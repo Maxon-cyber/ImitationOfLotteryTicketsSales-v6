@@ -10,21 +10,17 @@ namespace LotteryTicketWebAPI.RequestProcessing;
 
 internal class ProcessingClientRequests
 {
-    private int _dataSize;
-    private byte[] _buffer;
-    private byte[] _sentData;
-    private string _request;
-    private string _description;
-    private StringBuilder _receivedData;
-    private Socket _tcpListener;
+    private readonly byte[] _buffer;
+    private readonly string _request;
+    private readonly string _description;
+    private readonly StringBuilder _receivedData;
+    private readonly Socket _tcpListener;
 
     internal static string Response { get; private set; }
 
     internal ProcessingClientRequests(string httpMethod, int? id)
     {
-        _dataSize = default;
         _buffer = new byte[512];
-        _sentData = new byte[512];
         _receivedData = new StringBuilder();
         _tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -57,13 +53,13 @@ internal class ProcessingClientRequests
                    ConnectingToTheServer.Port
                    ));
 
-            _sentData = Encoding.UTF8.GetBytes(_request);
-            await _tcpListener.SendAsync(_sentData);
+            byte[] sentData = Encoding.UTF8.GetBytes(_request);
+            await _tcpListener.SendAsync(sentData);
 
             await ResponseReceivedFromServerAsync();
             EndSession();
         }
-        catch (Exception ex) when (!_tcpListener.Connected)
+        catch (SocketException ex) when (!_tcpListener.Connected)
         {
             Logger.LogError(
                 ServerResponse.ConnectionIsInterrupted,
@@ -87,9 +83,9 @@ internal class ProcessingClientRequests
         {
             do
             {
-                 _dataSize = await _tcpListener.ReceiveAsync(_buffer);
+                 int dataSize = await _tcpListener.ReceiveAsync(_buffer);
 
-                _receivedData.Append(Encoding.UTF8.GetString(_buffer, 0, Convert.ToInt32(_dataSize)));
+                _receivedData.Append(Encoding.UTF8.GetString(_buffer, 0, Convert.ToInt32(dataSize)));
             }
             while (_tcpListener.Available > 0);
 

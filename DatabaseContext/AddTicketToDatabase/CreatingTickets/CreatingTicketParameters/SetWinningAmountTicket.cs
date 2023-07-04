@@ -1,4 +1,4 @@
-﻿namespace DatabaseContext.AddTicketToDatabase.CreateTicket.CreateTicketParameters;
+﻿namespace DatabaseContext.AddTicketToDatabase.CreatingTickets.CreatingTicketParameters;
 
 internal class SetWinningAmountTicket
 {

@@ -11,15 +11,13 @@ namespace SocketServer.WebServer;
 
 internal class SocketWebServer
 {
-    private int _dataSize;
     private bool _isRunning;
-    private byte[] _receivedData;
-    private StringBuilder _sentData;
-    private Socket _tcpListener;
+    private readonly byte[] _receivedData;
+    private readonly StringBuilder _sentData;
+    private readonly Socket _tcpListener;
 
     internal SocketWebServer()
     {
-        _dataSize = 0;
         _receivedData = new byte[512];
         _sentData = new StringBuilder();
         _tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -62,7 +60,7 @@ internal class SocketWebServer
                         {
                             do
                             {
-                                _dataSize = tcpClient.Receive(_receivedData);
+                                int _dataSize = tcpClient.Receive(_receivedData);
 
                                 _sentData.Append(Encoding.UTF8.GetString(_receivedData, 0, _dataSize));
                             }
@@ -75,19 +73,19 @@ internal class SocketWebServer
                                   StringWritingParameters.NewLine
                                   );
 
-                            Task<string> responseFromDatabase = ManagementDatabase
-                                                                    .MakeRequestToDbAsync(_sentData.ToString());
+                            string responseFromDatabase = ManagementDatabase
+                                                                    .MakeRequestToDbAsync(_sentData.ToString()).Result;
 
                             _sentData.Clear();
 
                             Logger.LogInformation(
                                 ServerResponse.Ok,
                                 $"Ответ пользователю {ConnectingToTheServer.ClientAddress}: ",
-                                responseFromDatabase.Result,
+                                responseFromDatabase,
                                 StringWritingParameters.NewLine
                                 );
 
-                            tcpClient.Send(Encoding.UTF8.GetBytes(responseFromDatabase.Result));
+                            tcpClient.Send(Encoding.UTF8.GetBytes(responseFromDatabase));
 
                             Stop(tcpClient);
 
@@ -97,11 +95,17 @@ internal class SocketWebServer
                             );
                         });
                     }
+                    else
+                        Logger.LogInformation(
+                            ServerResponse.ConnectionClosed,
+                            "Пользователь завершил соединение",
+                            StringWritingParameters.NewLine
+                            );
 
                 }
             }
         }
-        catch (SocketException ex) when (!_tcpListener.Connected)
+        catch (SocketException ex) when (!_tcpListener.Blocking)
         {
             Logger.LogError(
                 ServerResponse.ConnectionIsInterrupted,

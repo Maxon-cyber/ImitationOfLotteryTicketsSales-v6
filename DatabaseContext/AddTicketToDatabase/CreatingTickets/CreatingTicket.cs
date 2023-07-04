@@ -1,10 +1,10 @@
-﻿using DatabaseContext.AddTicketToDatabase.CreateTicket.CreateTicketParameters;
+﻿using DatabaseContext.AddTicketToDatabase.CreatingTickets.CreatingTicketParameters;
 
-namespace DatabaseContext.AddTicketToDatabase.CreateTicket;
+namespace DatabaseContext.AddTicketToDatabase.CreatingTickets;
 
-internal class CreateTicket
+internal class CreatingTicket
 {
-    internal List<TicketEntity> CreateTicketAsync(int countTickets)
+    internal List<TicketEntity> CreateTicket(int countTickets)
     {
         return Enumerable
             .Range(0, countTickets)

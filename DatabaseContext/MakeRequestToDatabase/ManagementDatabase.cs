@@ -32,14 +32,14 @@ public class ManagementDatabase
 
             await SendRequestToDbAsync(command);
         }
-        catch (Exception) when (connection.ConnectionTimeout > 15)
+        catch (SqlException) when (connection.ConnectionTimeout > 15)
         {
             Logger.LogError(
-                $"Время подключения к базе данных истекло - {connection.CommandTimeout}",
+                $"Время подключения к базе данных истекло - ",
                 StringWritingParameters.NewLine
                 );
         }
-        catch (Exception) when (command.CommandText is null)
+        catch (ArgumentNullException) when (command.CommandText is null)
         {
             Logger.LogError(
                $"SQL запрос пуст",
@@ -60,7 +60,7 @@ public class ManagementDatabase
             }
         }
 
-        return "Hello";
+        return _response;
     }
 
     private static async Task SendRequestToDbAsync(SqlCommand sqlCommand)
@@ -78,5 +78,7 @@ public class ManagementDatabase
                 _response = $"{id}\n{status}\n{winningAmount}";
             }
         }
+        else
+            _response = null;
     }
 }

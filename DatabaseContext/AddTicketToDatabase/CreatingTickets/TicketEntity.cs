@@ -1,4 +1,4 @@
-﻿namespace DatabaseContext.AddTicketToDatabase.CreateTicket;
+﻿namespace DatabaseContext.AddTicketToDatabase.CreatingTickets;
 
 internal class TicketEntity
 {
