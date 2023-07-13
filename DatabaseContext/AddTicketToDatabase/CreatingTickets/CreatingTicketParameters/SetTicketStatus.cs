@@ -1,6 +1,6 @@
 ﻿namespace DatabaseContext.AddTicketToDatabase.CreatingTickets.CreatingTicketParameters;
 
-internal class SetTicketStatus
+internal static class SetTicketStatus
 {
     internal static string SetStatus()
     {

@@ -1,8 +1,8 @@
 ﻿namespace DatabaseContext.AddTicketToDatabase;
 
-internal class AddTicket
+internal static class AddTicket
 {
-    internal void Add()
+    internal static void Add()
     {
 
     }

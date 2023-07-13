@@ -2,9 +2,9 @@
 
 namespace DatabaseContext.AddTicketToDatabase.CreatingTickets;
 
-internal class CreatingTicket
+internal static class CreatingTicket
 {
-    internal List<TicketEntity> CreateTicket(int countTickets)
+    internal static List<TicketEntity> CreateTicket(int countTickets)
     {
         return Enumerable
             .Range(0, countTickets)

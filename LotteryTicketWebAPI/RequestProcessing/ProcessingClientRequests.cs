@@ -53,8 +53,7 @@ internal class ProcessingClientRequests
                    ConnectingToTheServer.Port
                    ));
 
-            byte[] sentData = Encoding.UTF8.GetBytes(_request);
-            await _tcpListener.SendAsync(sentData);
+            await _tcpListener.SendAsync(Encoding.UTF8.GetBytes(_request));
 
             await ResponseReceivedFromServerAsync();
             EndSession();
@@ -103,7 +102,7 @@ internal class ProcessingClientRequests
                 StringWritingParameters.NewLine
                 );
         }
-        catch (Exception ex) when (_receivedData is null)
+        catch (ArgumentNullException ex) when (_receivedData is null)
         {
             Logger.LogError(
                 ServerResponse.NotFound,

@@ -1,11 +1,12 @@
-﻿using System.Text;
+﻿using System.Collections.Immutable;
+using System.Text;
 
 namespace DatabaseContext.AddTicketToDatabase.CreatingTickets.CreatingTicketParameters;
 
-internal class SetTicketID
+internal static class SetTicketID
 {
     private static readonly StringBuilder _builderId = new StringBuilder();
-    private static readonly HashSet<long> _checkRepeatId = new HashSet<long>();
+    private static readonly ImmutableHashSet<long> _checkRepeatId = ImmutableHashSet<long>.Empty;
     private const int COUNT_OF_NUMBERS_IN_ID = 8;
 
     internal static long CreateTicketID()

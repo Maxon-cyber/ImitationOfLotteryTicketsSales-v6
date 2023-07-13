@@ -5,15 +5,16 @@ using System.Data;
 
 namespace DatabaseContext.MakeRequestToDatabase;
 
-public class ManagementDatabase
+public static class ManagementDatabase
 {
     private const string CONNECTION_STRING = @"Server=localhost\\SQLEXPRESS;Database=master;Trusted_Connection=True;";
-    private static string _response;
 
     public static async Task<string> MakeRequestToDbAsync(string request)
     {
         await using SqlConnection connection = new SqlConnection(CONNECTION_STRING);
         await using SqlCommand command = new SqlCommand(request, connection);
+
+        string response = null;
 
         try
         {
@@ -30,19 +31,19 @@ public class ManagementDatabase
                 StringWritingParameters.NewLine
                 );
 
-            await SendRequestToDbAsync(command);
+            response = await SendRequestToDbAsync(command);
         }
-        catch (SqlException) when (connection.ConnectionTimeout > 15)
+        catch (SqlException ex) when (connection.ConnectionTimeout > 15)
         {
             Logger.LogError(
-                $"Время подключения к базе данных истекло - ",
+                $"Время подключения к базе данных истекло \n{ex}",
                 StringWritingParameters.NewLine
                 );
         }
-        catch (ArgumentNullException) when (command.CommandText is null)
+        catch (ArgumentNullException ex) when (command.CommandText is null)
         {
             Logger.LogError(
-               $"SQL запрос пуст",
+               $"SQL запрос пуст \n{ex}",
                StringWritingParameters.NewLine
                );
         }
@@ -52,7 +53,7 @@ public class ManagementDatabase
             {
                 await connection.CloseAsync();
 
-                Logger.LogError(
+                Logger.LogInformation(
                     "Подключение закрыто" +
                     $"\tСостояние: {connection.State}",
                     StringWritingParameters.NewLine
@@ -60,12 +61,13 @@ public class ManagementDatabase
             }
         }
 
-        return _response;
+        return response;
     }
 
-    private static async Task SendRequestToDbAsync(SqlCommand sqlCommand)
+    private static async Task<string> SendRequestToDbAsync(SqlCommand sqlCommand)
     {
         await using SqlDataReader reader = await sqlCommand.ExecuteReaderAsync();
+        string response = null;
 
         if (reader.HasRows)
         {
@@ -75,10 +77,12 @@ public class ManagementDatabase
                 object status = reader["Status"];
                 object winningAmount = reader["WinningAmount"];
 
-                _response = $"{id}\n{status}\n{winningAmount}";
+                response = $"{id}\n{status}\n{winningAmount}";
             }
         }
         else
-            _response = null;
+            response = null;
+
+        return response;
     }
 }

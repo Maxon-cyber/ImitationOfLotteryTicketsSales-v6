@@ -1,6 +1,6 @@
 ﻿namespace DatabaseContext.AddTicketToDatabase.CreatingTickets;
 
-internal class TicketEntity
+internal record class TicketEntity
 {
     internal long Id { get; set; }
     internal string Status { get; set; }

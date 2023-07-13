@@ -4,7 +4,7 @@ using ResponseFromTheServer;
 
 namespace Logging;
 
-public class Logger
+public static class Logger
 {
     private static string _loggerAction;
 
@@ -24,7 +24,7 @@ public class Logger
                 break;
         }
 
-        new CreateLoggerActionFile().WriteLoggerActionToFile(_loggerAction);
+        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
@@ -48,7 +48,7 @@ public class Logger
                 break;
         }
 
-        new CreateLoggerActionFile().WriteLoggerActionToFile(_loggerAction);
+        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
@@ -78,7 +78,7 @@ public class Logger
                 break;
         }
 
-        new CreateLoggerActionFile().WriteLoggerActionToFile(_loggerAction);
+        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
@@ -99,7 +99,7 @@ public class Logger
                 break;
         }
 
-        new CreateLoggerActionFile().WriteLoggerActionToFile(_loggerAction);
+        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
@@ -123,7 +123,7 @@ public class Logger
                 break;
         }
 
-        new CreateLoggerActionFile().WriteLoggerActionToFile(_loggerAction);
+        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
@@ -146,7 +146,7 @@ public class Logger
                 break;
         }
 
-        new CreateLoggerActionFile().WriteLoggerActionToFile(_loggerAction);
+        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }

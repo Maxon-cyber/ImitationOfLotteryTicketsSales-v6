@@ -60,9 +60,9 @@ internal class SocketWebServer
                         {
                             do
                             {
-                                int _dataSize = tcpClient.Receive(_receivedData);
+                                int dataSize = tcpClient.Receive(_receivedData);
 
-                                _sentData.Append(Encoding.UTF8.GetString(_receivedData, 0, _dataSize));
+                                _sentData.Append(Encoding.UTF8.GetString(_receivedData, 0, dataSize));
                             }
                             while (tcpClient.Available > 0);
 
@@ -74,7 +74,8 @@ internal class SocketWebServer
                                   );
 
                             string responseFromDatabase = ManagementDatabase
-                                                                    .MakeRequestToDbAsync(_sentData.ToString()).Result;
+                                                                    .MakeRequestToDbAsync(_sentData.ToString())
+                                                                    .Result;
 
                             _sentData.Clear();
 
