@@ -1,27 +1,23 @@
-﻿using System.Net.Sockets;
-using System.Net;
-using System.Text;
-using Logging.StringRecordingParameters;
+﻿using ConnectionParameters;
+using DatabaseContext.Database.Query;
 using Logging;
+using Logging.StringRecordingParameters;
 using ResponseFromTheServer;
-using ConnectionParameters;
-using DatabaseContext.MakeRequestToDatabase;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 
 namespace SocketServer.WebServer;
 
 internal class SocketWebServer
 {
     private bool _isRunning;
-    private readonly byte[] _receivedData;
-    private readonly StringBuilder _sentData;
-    private readonly Socket _tcpListener;
+    private List<string>? _responseFromDatabase;
+    private readonly byte[] _receivedData = new byte[1024];
+    private readonly StringBuilder _sentData = new StringBuilder();
+    private readonly Socket _tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-    internal SocketWebServer()
-    {
-        _receivedData = new byte[512];
-        _sentData = new StringBuilder();
-        _tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    }
+    internal SocketWebServer() { }
 
     internal void Start()
     {
@@ -46,7 +42,7 @@ internal class SocketWebServer
 
                 while (true)
                 {
-                    Socket tcpClient = _tcpListener.Accept();
+                    Socket? tcpClient = _tcpListener.Accept();
 
                     if (tcpClient.Connected)
                     {
@@ -73,36 +69,30 @@ internal class SocketWebServer
                                   StringWritingParameters.NewLine
                                   );
 
-                            string responseFromDatabase = ManagementDatabase
-                                                                    .MakeRequestToDbAsync(_sentData.ToString())
-                                                                    .Result;
+                            _responseFromDatabase = MSSQLDatabase
+                                                            .GetInstance()
+                                                            .ExecuteReaderAsync(_sentData.ToString())
+                                                            ?.Result
+                                                            ?.TextResult;
 
                             _sentData.Clear();
+
+                            string res = "";
+                            foreach (string response in _responseFromDatabase)
+                                res += response + "\n";
 
                             Logger.LogInformation(
                                 ServerResponse.Ok,
                                 $"Ответ пользователю {ConnectingToTheServer.ClientAddress}: ",
-                                responseFromDatabase,
+                                res,
                                 StringWritingParameters.NewLine
                                 );
 
-                            tcpClient.Send(Encoding.UTF8.GetBytes(responseFromDatabase));
+                            tcpClient.Send(Encoding.UTF8.GetBytes(res));
 
                             Stop(tcpClient);
-
-                            Logger.LogSeparator(
-                            new string('-', 110),
-                            StringWritingParameters.NewLine
-                            );
                         });
                     }
-                    else
-                        Logger.LogInformation(
-                            ServerResponse.ConnectionClosed,
-                            "Пользователь завершил соединение",
-                            StringWritingParameters.NewLine
-                            );
-
                 }
             }
         }
@@ -114,7 +104,7 @@ internal class SocketWebServer
                 StringWritingParameters.NewLine
                 );
         }
-        catch (ArgumentNullException ex) when (_receivedData is null)
+        catch (ArgumentNullException ex) when (_responseFromDatabase is null)
         {
             Logger.LogError(
                ServerResponse.NotFound,
@@ -131,6 +121,18 @@ internal class SocketWebServer
             _isRunning = false;
             tcpClient.Shutdown(SocketShutdown.Both);
             tcpClient.Close();
+
+            Logger.LogInformation(
+                ServerResponse.ConnectionClosed,
+                "Соединение закрыто",
+                StringWritingParameters.NewLine
+                );
+
+            Logger.LogSeparator(
+                '-', 
+                110, 
+                StringWritingParameters.NewLine
+                );
         }
     }
 }

@@ -2,9 +2,9 @@
 
 internal readonly struct SQLRequest
 {
-    internal static string GetRequest(int? id)
-        => "SELECT * FROM Tickets";
+    internal static string GetRequest()
+        => "SELECT * FROM dbo.AllTickets;";
 
     internal static string PostRequest(int? id)
-        => $"SELECT * FROM Tickets WHERE {id} = Id";
+        => $"SELECT * FROM dbo.AllTickets WHERE Id = {id};";
 }

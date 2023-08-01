@@ -10,11 +10,11 @@ namespace LotteryTicketWebAPI.RequestProcessing;
 
 internal class ProcessingClientRequests
 {
+    private string _request;
+    private string _description;
     private readonly byte[] _buffer;
-    private readonly string _request;
-    private readonly string _description;
     private readonly StringBuilder _receivedData;
-    private readonly Socket _tcpListener;
+    private readonly Socket _tcpClient;
 
     internal static string Response { get; private set; }
 
@@ -22,12 +22,12 @@ internal class ProcessingClientRequests
     {
         _buffer = new byte[512];
         _receivedData = new StringBuilder();
-        _tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        _tcpClient = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         switch (httpMethod)
         {
             case "Get":
-                _request = SQLRequest.GetRequest(id);
+                _request = SQLRequest.GetRequest();
                 _description = "Получить билет по Id";
                 break;
             case "Post":
@@ -47,18 +47,18 @@ internal class ProcessingClientRequests
 
         try
         {
-            await _tcpListener.ConnectAsync(
+            await _tcpClient.ConnectAsync(
                new IPEndPoint(
                    ConnectingToTheServer.IP,
                    ConnectingToTheServer.Port
                    ));
 
-            await _tcpListener.SendAsync(Encoding.UTF8.GetBytes(_request));
+            await _tcpClient.SendAsync(Encoding.UTF8.GetBytes(_request));
 
             await ResponseReceivedFromServerAsync();
             EndSession();
         }
-        catch (SocketException ex) when (!_tcpListener.Connected)
+        catch (SocketException ex) when (!_tcpClient.Connected)
         {
             Logger.LogError(
                 ServerResponse.ConnectionIsInterrupted,
@@ -82,11 +82,11 @@ internal class ProcessingClientRequests
         {
             do
             {
-                 int dataSize = await _tcpListener.ReceiveAsync(_buffer);
+                 int dataSize = await _tcpClient.ReceiveAsync(_buffer);
 
                 _receivedData.Append(Encoding.UTF8.GetString(_buffer, 0, Convert.ToInt32(dataSize)));
             }
-            while (_tcpListener.Available > 0);
+            while (_tcpClient.Available > 0);
 
             Logger.LogInformation(
                 ServerResponse.Ok,
@@ -98,7 +98,8 @@ internal class ProcessingClientRequests
             Response = _receivedData.ToString();
 
             Logger.LogSeparator(
-                new string('-', 110),
+                '-',
+                110,
                 StringWritingParameters.NewLine
                 );
         }
@@ -114,8 +115,10 @@ internal class ProcessingClientRequests
 
     private void EndSession()
     {
+        _request = null;
+        _description = null;
         _receivedData.Clear();
-        _tcpListener.Shutdown(SocketShutdown.Both);
-        _tcpListener.Close();
+        _tcpClient.Shutdown(SocketShutdown.Both);
+        _tcpClient.Close();
     }
 }

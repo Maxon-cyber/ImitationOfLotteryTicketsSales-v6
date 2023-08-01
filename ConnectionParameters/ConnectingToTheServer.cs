@@ -4,10 +4,10 @@ using System.Net.Sockets;
 
 namespace ConnectionParameters;
 
-public readonly struct ConnectingToTheServer
+public static class ConnectingToTheServer
 {
     public static IPAddress IP { get; } = GetIPAddress();
-    public static int Port { get; } = GetAvailablePort();
+    public static int Port { get; } = 8888;
     public static string IPString { get; } = GetIPAddress().ToString();
     public static string ClientAddress { get; } = $"{IP}:{Port}";
     public static int ListeningState { get; } = 1000;

@@ -10,9 +10,10 @@ internal static class CreatingTicket
             .Range(0, countTickets)
             .Select(ticket => new TicketEntity
             {
-                Id = SetTicketID.CreateTicketID(),
+                Id = SetTicketID.CreateID(),
                 Status = SetTicketStatus.SetStatus(),
-                WinningAmount = SetWinningAmountTicket.SetWinningAmount(0, 1_000_000)
+                //CreationTime = SetTimeOfTicketCreation.CreationTime(),
+                WinningAmount = SetWinningAmountTicket.SetWinningAmount(1_000, 1_000_000)
             }).ToList();
     }
 }

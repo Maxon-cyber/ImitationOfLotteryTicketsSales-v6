@@ -2,8 +2,8 @@
 
 internal enum Status
 {
-    Sold = 2,
-    NotSold = 3,
-    Paid = 4,
-    DoesNotExist = 5,
+    Sold = 1,
+    NotSold = 2,
+    Paid = 3,
+    DoesNotExist = 4,
 }

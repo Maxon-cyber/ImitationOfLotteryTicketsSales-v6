@@ -17,10 +17,10 @@ public static class Logger
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Write(_loggerAction);
+                Console.Out.WriteAsync(_loggerAction);
                 break;
             case StringWritingParameters.NewLine:
-                Console.WriteLine($"{_loggerAction}\n");
+                Console.Out.WriteLineAsync($"{_loggerAction}\n");
                 break;
         }
 
@@ -30,8 +30,8 @@ public static class Logger
     }
 
     public static void LogInformation(
-        ServerResponse response, 
-        string message, 
+        ServerResponse response,
+        string message,
         StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Green;
@@ -41,10 +41,10 @@ public static class Logger
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Write(_loggerAction);
+                Console.Out.WriteAsync(_loggerAction);
                 break;
             case StringWritingParameters.NewLine:
-                Console.WriteLine($"{_loggerAction}\n");
+                Console.Out.WriteLineAsync($"{_loggerAction}\n");
                 break;
         }
 
@@ -54,9 +54,9 @@ public static class Logger
     }
 
     public static void LogInformation(
-        ServerResponse response, 
-        string message, 
-        string clientRequest, 
+        ServerResponse response,
+        string message,
+        string clientRequest,
         StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Green;
@@ -67,14 +67,14 @@ public static class Logger
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Write($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message}");
+                Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message}");
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write(clientRequest);
+                Console.Out.WriteAsync(clientRequest);
                 break;
             case StringWritingParameters.NewLine:
-                Console.WriteLine($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message} ");
+                Console.Out.WriteLineAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message} ");
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine(clientRequest + "\n");
+                Console.Out.WriteLineAsync(clientRequest + "\n");
                 break;
         }
 
@@ -85,17 +85,17 @@ public static class Logger
 
     public static void LogError(string message, StringWritingParameters stringWritingParameters)
     {
-        Console.ForegroundColor = ConsoleColor.Green;
+        Console.ForegroundColor = ConsoleColor.Red;
 
         _loggerAction = $"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}";
 
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Write(_loggerAction);
+                Console.Out.WriteAsync(_loggerAction);
                 break;
             case StringWritingParameters.NewLine:
-                Console.WriteLine($"{_loggerAction}\n");
+                Console.Out.WriteLineAsync($"{_loggerAction}\n");
                 break;
         }
 
@@ -105,8 +105,8 @@ public static class Logger
     }
 
     public static void LogError(
-        ServerResponse error, 
-        string message, 
+        ServerResponse error,
+        string message,
         StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Red;
@@ -116,10 +116,10 @@ public static class Logger
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Write(_loggerAction);
+                Console.Out.WriteAsync(_loggerAction);
                 break;
             case StringWritingParameters.NewLine:
-                Console.WriteLine($"{_loggerAction}\n");
+                Console.Out.WriteLineAsync($"{_loggerAction}\n");
                 break;
         }
 
@@ -129,20 +129,21 @@ public static class Logger
     }
 
     public static void LogSeparator(
-        string separator,
+        char separator,
+        int countRepeat,
         StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.DarkMagenta;
 
-        _loggerAction = $"{separator}";
+        _loggerAction = new string(separator, countRepeat);
 
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Write(_loggerAction);
+                Console.Out.WriteAsync(_loggerAction);
                 break;
             case StringWritingParameters.NewLine:
-                Console.WriteLine($"{_loggerAction}\n");
+                Console.Out.WriteLineAsync($"{_loggerAction}\n");
                 break;
         }
 

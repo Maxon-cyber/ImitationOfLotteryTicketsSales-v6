@@ -1,0 +1,4 @@
+﻿---
+Database:
+  - ConnectionString: Server=localhost/SQLEXPRESS;Database=LotteyTickets;Trusted_Connection=True;
+...
