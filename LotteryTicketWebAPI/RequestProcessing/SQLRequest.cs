@@ -2,9 +2,12 @@
 
 internal readonly struct SQLRequest
 {
-    internal static string GetRequest()
-        => "SELECT * FROM dbo.AllTickets;";
+    internal static string GetAllTicketsQuery()
+        => $"SELECT * FROM dbo.AllTickets;";
 
-    internal static string PostRequest(int? id)
+    internal static string GetTicketAnIdQuery(int? id)
+        => $"SELECT * FROM dbo.AllTickets WHERE Id = {id};";
+
+    internal static string BuyTicketAnIdQuery(int? id)
         => $"SELECT * FROM dbo.AllTickets WHERE Id = {id};";
 }

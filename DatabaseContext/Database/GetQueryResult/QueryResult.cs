@@ -10,7 +10,7 @@ internal static class QueryResult
     {
         await using SqlDataReader reader = await command.ExecuteReaderAsync();
 
-        List<string> response = new List<string>();
+        List<string>? response = new List<string>();
 
         try
         {
@@ -33,18 +33,11 @@ internal static class QueryResult
                     object? winningAmount = reader["WinningAmount"];
                
                     response.Add($"\nId: {id} \nStatus: {status} \nWinning Amount: {winningAmount}");
-
-                    //Logger.LogInformation(
-                    //    $"Ответ из БД: {result.TextResult}",
-                    //    StringWritingParameters.NewLine
-                    //    );
                 }
             }
         }
         catch (SqlException ex) when (!reader.HasRows)
         {
-            //result.TextError = ex.ToString();
-
             Logger.LogError(
                 $"База Данных пуста \n{ex}",
             StringWritingParameters.NewLine
@@ -52,8 +45,6 @@ internal static class QueryResult
         }
         catch (ArgumentNullException ex) when (reader is null)
         {
-            //result.TextError = ex.ToString();
-
             Logger.LogError(
                 ex.ToString(),
                 StringWritingParameters.NewLine
@@ -63,34 +54,40 @@ internal static class QueryResult
         return response;
     }
 
-    internal static async Task<Result<int>> GetNonQueryResultAsync(SqlCommand command)
+    internal static async Task<int> GetNonQueryResultAsync(SqlCommand command)
     {
-        Result<int>? result = new Result<int>();
+        int result = 0;
 
         try
         {
-            result.TextResult = await command.ExecuteNonQueryAsync();
+            result = await command.ExecuteNonQueryAsync();
         }
-        catch (ArgumentNullException ex) when (result.TextResult is 0)
+        catch (ArgumentNullException ex) when (result is 0)
         {
             Logger.LogError(
               $"Столбцы для запроса {command.CommandText} не найдены \n{ex}",
               StringWritingParameters.NewLine
               );
         }
-        catch (ArgumentNullException ex) when (command is null)
-        {
-
-        }
 
         return result;
     }
 
-    internal static async Task<Result<object>?> GetScalarResultAsync(SqlCommand command)
+    internal static async Task<object?> GetScalarResultAsync(SqlCommand command)
     {
-        Result<object>? result = new Result<object>();
+        object? result = null;
 
-        result.TextResult = await command.ExecuteScalarAsync();
+        try
+        {
+            result = await command.ExecuteScalarAsync();
+        }
+        catch (ArgumentNullException ex) when (result is 0)
+        {
+            Logger.LogError(
+              $"Столбцы для запроса {command.CommandText} не найдены \n{ex}",
+              StringWritingParameters.NewLine
+              );
+        }
 
         return result;
     }

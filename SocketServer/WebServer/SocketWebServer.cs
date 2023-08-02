@@ -70,25 +70,23 @@ internal class SocketWebServer
                                   );
 
                             _responseFromDatabase = MSSQLDatabase
-                                                            .GetInstance()
+                                                            .Singleton
                                                             .ExecuteReaderAsync(_sentData.ToString())
                                                             ?.Result
                                                             ?.TextResult;
 
                             _sentData.Clear();
 
-                            string res = "";
-                            foreach (string response in _responseFromDatabase)
-                                res += response + "\n";
+                            string? result = GetResult(_responseFromDatabase);
 
                             Logger.LogInformation(
                                 ServerResponse.Ok,
                                 $"Ответ пользователю {ConnectingToTheServer.ClientAddress}: ",
-                                res,
+                                result,
                                 StringWritingParameters.NewLine
                                 );
 
-                            tcpClient.Send(Encoding.UTF8.GetBytes(res));
+                            tcpClient.Send(Encoding.UTF8.GetBytes(result));
 
                             Stop(tcpClient);
                         });
@@ -112,6 +110,25 @@ internal class SocketWebServer
                StringWritingParameters.NewLine
                );
         }
+    }
+
+    private string? GetResult(List<string> responseFromDatabase)
+    {
+        string? result = null;
+        try
+        {
+            foreach (string? item in responseFromDatabase)
+                result += item;
+        }
+        catch(ArgumentNullException ex)
+        {
+            Logger.LogError(
+                $"{ex}", 
+                StringWritingParameters.NewLine
+                );
+        }
+
+        return result;
     }
 
     private void Stop(Socket tcpClient)

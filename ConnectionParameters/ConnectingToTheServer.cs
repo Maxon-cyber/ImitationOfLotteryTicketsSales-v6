@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using Logging;
+using Logging.StringRecordingParameters;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
@@ -16,10 +18,22 @@ public static class ConnectingToTheServer
     {
         IPAddress[] ipAddresses = Dns.GetHostEntry(Environment.MachineName).AddressList;
 
-        if (ipAddresses[0].AddressFamily == AddressFamily.InterNetwork)
-            return ipAddresses[0];
-        else
-            return ipAddresses[1];
+        int ipAddressItem = 0;
+
+        try
+        {
+            while (ipAddresses[ipAddressItem].AddressFamily != AddressFamily.InterNetwork)
+                ipAddressItem++;
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            Logger.LogError(
+                ex.ToString(),
+                StringWritingParameters.NewLine
+                );
+        }
+
+        return ipAddresses[ipAddressItem];
     }
 
     private static int[] GetAllPorts()

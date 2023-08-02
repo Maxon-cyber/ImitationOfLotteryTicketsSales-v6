@@ -2,5 +2,5 @@
 
 internal class DatabaseConnection
 {
-    internal ConnectionStringModel Database { get; set; }
+    internal ConnectionStringModel ConnectionString { get; set; }
 }

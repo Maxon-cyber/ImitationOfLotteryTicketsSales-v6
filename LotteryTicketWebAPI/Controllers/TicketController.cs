@@ -7,19 +7,24 @@ namespace LotteryTicketWebAPI.Controllers;
 [Route("Ticket")]
 public class TicketController : Controller
 {
-    [Route("/")]
-    public ActionResult<string> GetAllTickets()
+    [HttpGet("GetAllTickets")]
+    public async Task<ActionResult<string>> GetAllTickets()
     {
-        return "Tickets";
+        await new ProcessingClientRequests("GetAllTickets", null).SendDataClientToServerAsync();
+
+        if (ProcessingClientRequests.Response is null)
+            return await Task.FromResult<ActionResult<string>>(ResponseOnSite.NotFound("Ѕилет не найден"));
+
+        return await Task.FromResult<ActionResult<string>>(ResponseOnSite.Ok(ProcessingClientRequests.Response));
     }
 
     [HttpGet("GetTicketAnId/{id:int}")]
-    public async Task<ActionResult<string>> Get(int? id)
+    public async Task<ActionResult<string>> GetTicket(int? id)
     {
         if (id is null) 
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.BadRequest("¬ведите id"));
         
-        await new ProcessingClientRequests("Get", id).SendDataClientToServerAsync();
+        await new ProcessingClientRequests("GetTicketAnId", id).SendDataClientToServerAsync();
 
         if (ProcessingClientRequests.Response is null) 
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.NotFound("Ѕилет не найден"));
@@ -28,12 +33,12 @@ public class TicketController : Controller
     }
 
     [HttpPost("BuyTicketAnId/{id:int}")]
-    public async Task<ActionResult<string>> Post(int? id)
+    public async Task<ActionResult<string>> BuyTicket(int? id)
     {
         if (id is null) 
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.BadRequest("¬ведите id"));
 
-        await new ProcessingClientRequests("Post", id).SendDataClientToServerAsync();
+        await new ProcessingClientRequests("BuyTicketAnId", id).SendDataClientToServerAsync();
 
         if (ProcessingClientRequests.Response is null)
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.NotFound("Ѕилет не найден"));

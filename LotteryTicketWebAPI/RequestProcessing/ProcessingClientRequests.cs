@@ -16,7 +16,7 @@ internal class ProcessingClientRequests
     private readonly StringBuilder _receivedData;
     private readonly Socket _tcpClient;
 
-    internal static string Response { get; private set; }
+    internal static string? Response { get; private set; }
 
     internal ProcessingClientRequests(string httpMethod, int? id)
     {
@@ -26,13 +26,17 @@ internal class ProcessingClientRequests
 
         switch (httpMethod)
         {
-            case "Get":
-                _request = SQLRequest.GetRequest();
+            case "GetAllTickets":
+                _request = SQLRequest.GetAllTicketsQuery();
+                _description = "Получить все билеты";
+                break;
+            case "GetTicketAnId":
+                _request = SQLRequest.GetTicketAnIdQuery(id);
                 _description = "Получить билет по Id";
                 break;
-            case "Post":
-                _request = SQLRequest.PostRequest(id);
-                _description = "Получить билет по ID";
+            case "BuyTicketAnId":
+                _request = SQLRequest.BuyTicketAnIdQuery(id);
+                _description = "Купить билет по Id";
                 break;
         }
     }
@@ -115,8 +119,8 @@ internal class ProcessingClientRequests
 
     private void EndSession()
     {
-        _request = null;
-        _description = null;
+        //_request = null;
+        //_description = null;
         _receivedData.Clear();
         _tcpClient.Shutdown(SocketShutdown.Both);
         _tcpClient.Close();

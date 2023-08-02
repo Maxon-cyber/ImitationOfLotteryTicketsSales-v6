@@ -2,9 +2,9 @@
 
 namespace DatabaseContext;
 
-internal interface IDatabase : IAsyncDisposable
+internal interface IDatabase
 {
-    internal Task<Result<int>?> ExecuteNonQueryAsync(string request);
+    internal Task<Result<int>> ExecuteNonQueryAsync(string request);
 
     internal Task<Result<object>?> ExecuteScalarAsync(string request);
 

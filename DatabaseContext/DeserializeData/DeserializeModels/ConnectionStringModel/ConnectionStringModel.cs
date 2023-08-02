@@ -8,5 +8,5 @@ namespace DatabaseContext.DeserializeData.DeserializeModels.ConnectionStringMode
 
 internal class ConnectionStringModel
 {
-    internal string ConnectionString { get; set; }
+    internal string ConnectionsString { get; set; }
 }
