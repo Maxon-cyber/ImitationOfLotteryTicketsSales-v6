@@ -1,4 +1,4 @@
-﻿using DatabaseContext.Database.GetQueryResult;
+﻿using DatabaseContext.Database.Query;
 
 namespace DatabaseContext;
 

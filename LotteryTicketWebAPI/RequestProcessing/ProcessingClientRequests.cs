@@ -10,20 +10,16 @@ namespace LotteryTicketWebAPI.RequestProcessing;
 
 internal class ProcessingClientRequests
 {
-    private string _request;
-    private string _description;
-    private readonly byte[] _buffer;
-    private readonly StringBuilder _receivedData;
-    private readonly Socket _tcpClient;
+    private readonly string _request;
+    private readonly string _description;
+    private readonly byte[] _buffer = new byte[512];
+    private readonly StringBuilder _receivedData = new StringBuilder();
+    private readonly Socket _tcpClient = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
     internal static string? Response { get; private set; }
 
     internal ProcessingClientRequests(string httpMethod, int? id)
     {
-        _buffer = new byte[512];
-        _receivedData = new StringBuilder();
-        _tcpClient = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
         switch (httpMethod)
         {
             case "GetAllTickets":
@@ -70,57 +66,36 @@ internal class ProcessingClientRequests
                 StringWritingParameters.NewLine
                 );
         }
-        catch (Exception ex) when (ex is ArgumentException or ArgumentNullException)
-        {
-            Logger.LogError(
-                ServerResponse.InvalidValue,
-                ex.ToString(),
-                StringWritingParameters.NewLine
-                );
-        }
     }
 
     private async Task ResponseReceivedFromServerAsync()
     {
-        try
+        do
         {
-            do
-            {
-                 int dataSize = await _tcpClient.ReceiveAsync(_buffer);
+            int dataSize = await _tcpClient.ReceiveAsync(_buffer);
 
-                _receivedData.Append(Encoding.UTF8.GetString(_buffer, 0, Convert.ToInt32(dataSize)));
-            }
-            while (_tcpClient.Available > 0);
-
-            Logger.LogInformation(
-                ServerResponse.Ok,
-                $"Ответ пользователю {ConnectingToTheServer.ClientAddress} - ",
-                _receivedData.ToString(),
-                StringWritingParameters.NewLine
-                );
-
-            Response = _receivedData.ToString();
-
-            Logger.LogSeparator(
-                '-',
-                110,
-                StringWritingParameters.NewLine
-                );
+            _receivedData.Append(Encoding.UTF8.GetString(_buffer, 0, dataSize));
         }
-        catch (ArgumentNullException ex) when (_receivedData is null)
-        {
-            Logger.LogError(
-                ServerResponse.NotFound,
-                ex.ToString(),
-                StringWritingParameters.NewLine
-                );
-        }
+        while (_tcpClient.Available > 0);
+
+        Logger.LogInformation(
+            ServerResponse.Ok,
+            $"Ответ пользователю {ConnectingToTheServer.ClientAddress} - ",
+            _receivedData.ToString(),
+            StringWritingParameters.NewLine
+            );
+
+        Response = _receivedData.ToString() is "null" ? " " : _receivedData.ToString();
+
+        Logger.LogSeparator(
+            '-',
+            110,
+            StringWritingParameters.NewLine
+            );
     }
 
     private void EndSession()
     {
-        //_request = null;
-        //_description = null;
         _receivedData.Clear();
         _tcpClient.Shutdown(SocketShutdown.Both);
         _tcpClient.Close();

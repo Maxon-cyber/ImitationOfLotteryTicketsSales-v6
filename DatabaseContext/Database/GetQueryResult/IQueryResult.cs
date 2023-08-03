@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using DatabaseContext.Database.Query;
 
 namespace DatabaseContext.Database.GetQueryResult;
 

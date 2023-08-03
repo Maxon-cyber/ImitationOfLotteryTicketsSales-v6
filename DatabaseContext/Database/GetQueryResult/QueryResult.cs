@@ -56,38 +56,14 @@ internal static class QueryResult
 
     internal static async Task<int> GetNonQueryResultAsync(SqlCommand command)
     {
-        int result = 0;
-
-        try
-        {
-            result = await command.ExecuteNonQueryAsync();
-        }
-        catch (ArgumentNullException ex) when (result is 0)
-        {
-            Logger.LogError(
-              $"Столбцы для запроса {command.CommandText} не найдены \n{ex}",
-              StringWritingParameters.NewLine
-              );
-        }
+        int result = await command.ExecuteNonQueryAsync();
 
         return result;
     }
 
     internal static async Task<object?> GetScalarResultAsync(SqlCommand command)
     {
-        object? result = null;
-
-        try
-        {
-            result = await command.ExecuteScalarAsync();
-        }
-        catch (ArgumentNullException ex) when (result is 0)
-        {
-            Logger.LogError(
-              $"Столбцы для запроса {command.CommandText} не найдены \n{ex}",
-              StringWritingParameters.NewLine
-              );
-        }
+        object? result = await command.ExecuteScalarAsync();
 
         return result;
     }

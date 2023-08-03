@@ -33,6 +33,12 @@ internal class SocketWebServer
                     StringWritingParameters.NewLine
                     );
 
+                Logger.LogSeparator(
+                    '-',
+                    110,
+                    StringWritingParameters.NewLine
+                    );
+
                 _tcpListener.Bind(
                     new IPEndPoint(
                         ConnectingToTheServer.IP,
@@ -77,7 +83,7 @@ internal class SocketWebServer
 
                             _sentData.Clear();
 
-                            string? result = GetResult(_responseFromDatabase);
+                            string? result = GetResult(_responseFromDatabase) ?? "null";
 
                             Logger.LogInformation(
                                 ServerResponse.Ok,
@@ -102,31 +108,14 @@ internal class SocketWebServer
                 StringWritingParameters.NewLine
                 );
         }
-        catch (ArgumentNullException ex) when (_responseFromDatabase is null)
-        {
-            Logger.LogError(
-               ServerResponse.NotFound,
-               ex.ToString(),
-               StringWritingParameters.NewLine
-               );
-        }
     }
 
     private string? GetResult(List<string> responseFromDatabase)
     {
         string? result = null;
-        try
-        {
-            foreach (string? item in responseFromDatabase)
+        
+        foreach (string? item in responseFromDatabase)
                 result += item;
-        }
-        catch(ArgumentNullException ex)
-        {
-            Logger.LogError(
-                $"{ex}", 
-                StringWritingParameters.NewLine
-                );
-        }
 
         return result;
     }

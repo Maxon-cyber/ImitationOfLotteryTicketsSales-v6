@@ -18,11 +18,11 @@ public sealed class MSSQLDatabase : IDatabase
 
     private MSSQLDatabase()
     {
-        //ConnectionToDatabase = new DeserializerYaml<DatabaseConnection>()
+        //ConnectionToDatabase = new DeserializerYaml<ConnectionStringModel>()
         //    ?.DeserializeConfiguringFile(ConfigFilePath.ConnectionString)
         //    ?.Result
         //    ?.ConnectionString
-        //    ?.ConnectionsString;
+        //    ?.ConnectionString;
 
         Logger.LogInformation(
             "Запрос к базе данных",
@@ -44,13 +44,6 @@ public sealed class MSSQLDatabase : IDatabase
             ConnectingInformation(connection);
 
             result.TextResult = await Task.FromResult(QueryResult.GetReaderResultAsync(command)?.Result);
-        }
-        catch (SqlException ex) when (result?.TextResult is null)
-        {
-            Logger.LogError(
-                $"Билет не найден \n{ex}",
-                StringWritingParameters.NewLine
-                );
         }
         catch (SqlException ex) when (connection.ConnectionTimeout > 30)
         {
@@ -89,13 +82,6 @@ public sealed class MSSQLDatabase : IDatabase
 
             result.TextResult =await Task.FromResult(QueryResult.GetScalarResultAsync(command)?.Result);
         }
-        catch (ArgumentNullException ex) when (result.TextResult is null)
-        {
-            Logger.LogError(
-                $"Столбцы для запроса {request} не найдены \n{ex}",
-                StringWritingParameters.NewLine
-                );
-        }
         catch (SqlException ex) when (connection.ConnectionTimeout > 30)
         {
             Logger.LogError(
@@ -132,13 +118,6 @@ public sealed class MSSQLDatabase : IDatabase
             ConnectingInformation(connection);
 
             result.TextResult = await Task.FromResult(QueryResult.GetNonQueryResultAsync(command).Result);
-        }
-        catch (ArgumentNullException ex) when (result.TextResult is 0)
-        {
-            Logger.LogError(
-               $"Столбцы для запроса {request} не найдены \n{ex}",
-               StringWritingParameters.NewLine
-               );
         }
         catch (SqlException ex) when (connection.ConnectionTimeout > 30)
         {

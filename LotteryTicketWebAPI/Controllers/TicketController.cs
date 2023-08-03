@@ -12,13 +12,13 @@ public class TicketController : Controller
     {
         await new ProcessingClientRequests("GetAllTickets", null).SendDataClientToServerAsync();
 
-        if (ProcessingClientRequests.Response is null)
+        if (ProcessingClientRequests.Response is " ")
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.NotFound("Билет не найден"));
 
         return await Task.FromResult<ActionResult<string>>(ResponseOnSite.Ok(ProcessingClientRequests.Response));
     }
 
-    [HttpGet("GetTicketAnId/{id:int}")]
+    [HttpGet("GetTicket/{id:int?}")]
     public async Task<ActionResult<string>> GetTicket(int? id)
     {
         if (id is null) 
@@ -26,13 +26,13 @@ public class TicketController : Controller
         
         await new ProcessingClientRequests("GetTicketAnId", id).SendDataClientToServerAsync();
 
-        if (ProcessingClientRequests.Response is null) 
+        if (ProcessingClientRequests.Response is " ") 
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.NotFound("Билет не найден"));
 
         return await Task.FromResult<ActionResult<string>>(ResponseOnSite.Ok(ProcessingClientRequests.Response));
     }
 
-    [HttpPost("BuyTicketAnId/{id:int}")]
+    [HttpPost("BuyTicket/{id:int?}")]
     public async Task<ActionResult<string>> BuyTicket(int? id)
     {
         if (id is null) 
@@ -40,7 +40,7 @@ public class TicketController : Controller
 
         await new ProcessingClientRequests("BuyTicketAnId", id).SendDataClientToServerAsync();
 
-        if (ProcessingClientRequests.Response is null)
+        if (ProcessingClientRequests.Response is " ")
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.NotFound("Билет не найден"));
 
         return await Task.FromResult<ActionResult<string>>(ResponseOnSite.Ok(ProcessingClientRequests.Response));
