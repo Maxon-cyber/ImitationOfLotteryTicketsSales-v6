@@ -11,7 +11,8 @@ namespace SocketServer.WebServer;
 
 internal class SocketWebServer
 {
-    private bool _isRunning;
+    private const int COUNT_OF_REPEAT_SEPARATOR = 125;
+
     private List<string>? _responseFromDatabase;
     private readonly byte[] _receivedData = new byte[1024];
     private readonly StringBuilder _sentData = new StringBuilder();
@@ -23,86 +24,81 @@ internal class SocketWebServer
     {
         try
         {
-            if (!_isRunning)
+            Logger.LogInformationAsync(
+                ServerResponse.ServerSuccessfullyStarted,
+                "\nСервер запущен\nОжидание подключений...",
+                StringWritingParameters.NewLine
+                );
+
+            Logger.LogSeparatorAsync(
+                '-',
+                COUNT_OF_REPEAT_SEPARATOR,
+                StringWritingParameters.NewLine
+                );
+
+            _tcpListener.Bind(
+                new IPEndPoint(
+                    ConnectingToTheServer.IP,
+                    ConnectingToTheServer.Port
+                    ));
+            _tcpListener.Listen(ConnectingToTheServer.ListeningState);
+
+            while (true)
             {
-                _isRunning = true;
+                Socket? tcpClient = _tcpListener.Accept();
 
-                Logger.LogInformation(
-                    ServerResponse.ServerSuccessfullyStarted,
-                    "\nСервер запущен\nОжидание подключений...",
-                    StringWritingParameters.NewLine
-                    );
-
-                Logger.LogSeparator(
-                    '-',
-                    110,
-                    StringWritingParameters.NewLine
-                    );
-
-                _tcpListener.Bind(
-                    new IPEndPoint(
-                        ConnectingToTheServer.IP,
-                        ConnectingToTheServer.Port
-                        ));
-                _tcpListener.Listen(ConnectingToTheServer.ListeningState);
-
-                while (true)
+                if (tcpClient.Connected)
                 {
-                    Socket? tcpClient = _tcpListener.Accept();
+                    Logger.LogInformationAsync(
+                        ServerResponse.ConnectionIsStable,
+                        $"Пользователь {ConnectingToTheServer.ClientAddress} подключился",
+                        StringWritingParameters.NewLine
+                        );
 
-                    if (tcpClient.Connected)
+                    Task.Run(() =>
                     {
-                        Logger.LogInformation(
-                            ServerResponse.ConnectionIsStable,
-                            $"Пользователь {ConnectingToTheServer.ClientAddress} подключился",
+                        do
+                        {
+                            int dataSize = tcpClient.Receive(_receivedData);
+
+                            _sentData.Append(Encoding.UTF8.GetString(_receivedData, 0, dataSize));
+                        }
+                        while (tcpClient.Available > 0);
+
+                        Logger.LogInformationAsync(
+                              ServerResponse.RequestProcessedSuccessfully,
+                              $"Пользователь {ConnectingToTheServer.ClientAddress} запросил: ",
+                              _sentData.ToString(),
+                              StringWritingParameters.NewLine
+                              );
+
+                        _responseFromDatabase = MSSQLDatabase
+                                                        .GetInstance("MSSQLDatabase")
+                                                        .ExecuteReaderAsync(_sentData.ToString())
+                                                        ?.Result
+                                                        ?.TextResult;
+
+                        _sentData.Clear();
+
+                        string? result = GetResult(_responseFromDatabase) ?? "null";
+
+                        Logger.LogInformationAsync(
+                            ServerResponse.Ok,
+                            $"Ответ пользователю {ConnectingToTheServer.ClientAddress}: ",
+                            result,
                             StringWritingParameters.NewLine
                             );
 
-                        Task.Run(() =>
-                        {
-                            do
-                            {
-                                int dataSize = tcpClient.Receive(_receivedData);
+                        tcpClient.Send(Encoding.UTF8.GetBytes(result));
 
-                                _sentData.Append(Encoding.UTF8.GetString(_receivedData, 0, dataSize));
-                            }
-                            while (tcpClient.Available > 0);
-
-                            Logger.LogInformation(
-                                  ServerResponse.RequestProcessedSuccessfully,
-                                  $"Пользователь {ConnectingToTheServer.ClientAddress} запросил: ",
-                                  _sentData.ToString(),
-                                  StringWritingParameters.NewLine
-                                  );
-
-                            _responseFromDatabase = MSSQLDatabase
-                                                            .Singleton
-                                                            .ExecuteReaderAsync(_sentData.ToString())
-                                                            ?.Result
-                                                            ?.TextResult;
-
-                            _sentData.Clear();
-
-                            string? result = GetResult(_responseFromDatabase) ?? "null";
-
-                            Logger.LogInformation(
-                                ServerResponse.Ok,
-                                $"Ответ пользователю {ConnectingToTheServer.ClientAddress}: ",
-                                result,
-                                StringWritingParameters.NewLine
-                                );
-
-                            tcpClient.Send(Encoding.UTF8.GetBytes(result));
-
-                            Stop(tcpClient);
-                        });
-                    }
+                        Stop(tcpClient);
+                    });
                 }
             }
         }
         catch (SocketException ex) when (!_tcpListener.Blocking)
         {
-            Logger.LogError(
+            Logger.LogErrorAsync(
                 ServerResponse.ConnectionIsInterrupted,
                 ex.ToString(),
                 StringWritingParameters.NewLine
@@ -113,32 +109,28 @@ internal class SocketWebServer
     private string? GetResult(List<string> responseFromDatabase)
     {
         string? result = null;
-        
+
         foreach (string? item in responseFromDatabase)
-                result += item;
+            result += item;
 
         return result;
     }
 
     private void Stop(Socket tcpClient)
     {
-        if (_isRunning)
-        {
-            _isRunning = false;
-            tcpClient.Shutdown(SocketShutdown.Both);
-            tcpClient.Close();
+        tcpClient.Shutdown(SocketShutdown.Both);
+        tcpClient.Close();
 
-            Logger.LogInformation(
-                ServerResponse.ConnectionClosed,
-                "Соединение закрыто",
-                StringWritingParameters.NewLine
-                );
+        Logger.LogInformationAsync(
+            ServerResponse.ConnectionClosed,
+            "Соединение закрыто",
+            StringWritingParameters.NewLine
+            );
 
-            Logger.LogSeparator(
-                '-', 
-                110, 
-                StringWritingParameters.NewLine
-                );
-        }
+        Logger.LogSeparatorAsync(
+            '-',
+            COUNT_OF_REPEAT_SEPARATOR,
+            StringWritingParameters.NewLine
+            );
     }
 }

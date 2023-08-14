@@ -7,6 +7,7 @@ public class StartLotteryTicketWebAPI
     public static void Main(string[] args)
     {
         Console.Title = "LotteryTicketWebAPI";
+        Console.WindowWidth = 150;
 
         var builder = WebApplication.CreateBuilder(args);
 

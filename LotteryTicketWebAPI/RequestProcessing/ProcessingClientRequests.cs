@@ -10,6 +10,8 @@ namespace LotteryTicketWebAPI.RequestProcessing;
 
 internal class ProcessingClientRequests
 {
+    private const int COUNT_OF_REPEAT_SEPARATOR = 130;
+
     private readonly string _request;
     private readonly string _description;
     private readonly byte[] _buffer = new byte[512];
@@ -39,7 +41,7 @@ internal class ProcessingClientRequests
 
     internal async Task SendDataClientToServerAsync()
     {
-        Logger.LogInformation(
+        await Logger.LogInformationAsync(
             ServerResponse.ConnectionIsStable,
             $"Пользователь {ConnectingToTheServer.ClientAddress} запросил - {_description}",
             StringWritingParameters.NewLine
@@ -58,9 +60,9 @@ internal class ProcessingClientRequests
             await ResponseReceivedFromServerAsync();
             EndSession();
         }
-        catch (SocketException ex) when (!_tcpClient.Connected)
+        catch (SocketException ex) when (!_tcpClient.Blocking)
         {
-            Logger.LogError(
+            await Logger.LogErrorAsync(
                 ServerResponse.ConnectionIsInterrupted,
                 ex.ToString(),
                 StringWritingParameters.NewLine
@@ -78,26 +80,26 @@ internal class ProcessingClientRequests
         }
         while (_tcpClient.Available > 0);
 
-        Logger.LogInformation(
+        await Logger.LogInformationAsync(
             ServerResponse.Ok,
             $"Ответ пользователю {ConnectingToTheServer.ClientAddress} - ",
             _receivedData.ToString(),
             StringWritingParameters.NewLine
             );
 
-        Response = _receivedData.ToString() is "null" ? " " : _receivedData.ToString();
-
-        Logger.LogSeparator(
-            '-',
-            110,
-            StringWritingParameters.NewLine
-            );
+        Response = _receivedData.ToString();
     }
 
-    private void EndSession()
+    private async Task EndSession()
     {
         _receivedData.Clear();
         _tcpClient.Shutdown(SocketShutdown.Both);
         _tcpClient.Close();
+
+        await Logger.LogSeparatorAsync(
+           '-',
+           COUNT_OF_REPEAT_SEPARATOR,
+           StringWritingParameters.NewLine
+           );
     }
 }

@@ -1,30 +1,39 @@
 ﻿using DatabaseContext.Configuring.ConfiguringFilePath;
 using DatabaseContext.Database.GetQueryResult;
-using DatabaseContext.DeserializeData.DeserializeModels.ConnectionStringModel;
+using DatabaseContext.DeserializeData.DeserializeModels.ConnectionStringModels;
 using Deserialize.YamlDeserialize;
 using Logging;
 using Logging.StringRecordingParameters;
 using System.Data;
 using System.Data.SqlClient;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace DatabaseContext.Database.Query;
 
 public sealed class MSSQLDatabase : IDatabase
 {
-    private readonly string? ConnectionToDatabase
-        = @"Server=localhost\SQLEXPRESS;Database=LotteryTickets;Trusted_Connection=True;";
+    private static string _dataBaseName;
+    private readonly string ConnectionString;
 
-    public static MSSQLDatabase Singleton { get; } = new MSSQLDatabase();
-
-    private MSSQLDatabase()
+    private class Nested
     {
-        //ConnectionToDatabase = new DeserializerYaml<ConnectionStringModel>()
-        //    ?.DeserializeConfiguringFile(ConfigFilePath.ConnectionString)
-        //    ?.Result
-        //    ?.ConnectionString
-        //    ?.ConnectionString;
+        internal static MSSQLDatabase Instance { get; } = new MSSQLDatabase(_dataBaseName);
+    }
 
-        Logger.LogInformation(
+    public static MSSQLDatabase GetInstance(string DatabaseName)
+    {
+        _dataBaseName = DatabaseName;
+        return Nested.Instance;
+    }
+
+    private MSSQLDatabase(string DatabaseName)
+    {
+        ConnectionString = new DeserializerYaml<DatabaseModel>()
+            .DeserializeConfiguringFile(ConfigFilePath.ConnectionString, PascalCaseNamingConvention.Instance)
+            .Database[DatabaseName]
+            .ConnectionString;
+
+        Logger.LogInformationAsync(
             "Запрос к базе данных",
             StringWritingParameters.NewLine
             );
@@ -32,7 +41,7 @@ public sealed class MSSQLDatabase : IDatabase
 
     public async Task<Result<List<string>>?> ExecuteReaderAsync(string request)
     {
-        await using SqlConnection connection = new SqlConnection(ConnectionToDatabase);
+        await using SqlConnection connection = new SqlConnection(ConnectionString);
         await using SqlCommand command = new SqlCommand(request, connection);
 
         Result<List<string>>? result = new Result<List<string>>();
@@ -41,23 +50,16 @@ public sealed class MSSQLDatabase : IDatabase
         {
             await connection.OpenAsync();
 
-            ConnectingInformation(connection);
+            await ConnectingInformation(connection);
 
-            result.TextResult = await Task.FromResult(QueryResult.GetReaderResultAsync(command)?.Result);
+            result.TextResult = await Task.FromResult(QueryResult.GetReaderResultAsync(command)?.Result?.ToList());
         }
         catch (SqlException ex) when (connection.ConnectionTimeout > 30)
         {
-            Logger.LogError(
+            await Logger.LogErrorAsync(
                 $"Время подключения к базе данных истекло \n{ex}",
                 StringWritingParameters.NewLine
                 );
-        }
-        catch (ArgumentNullException ex) when (command.CommandText is null)
-        {
-            Logger.LogError(
-               $"SQL запрос пуст \n{ex}",
-               StringWritingParameters.NewLine
-               );
         }
         finally
         {
@@ -67,34 +69,27 @@ public sealed class MSSQLDatabase : IDatabase
         return result;
     }
 
-    public async Task<Result<object>?> ExecuteScalarAsync(string request)
+    public async Task<Result<object>> ExecuteScalarAsync(string request)
     {
-        await using SqlConnection connection = new SqlConnection(ConnectionToDatabase);
+        await using SqlConnection connection = new SqlConnection(ConnectionString);
         await using SqlCommand command = new SqlCommand(request, connection);
 
-        Result<object>? result = new Result<object>();
+        Result<object> result = new Result<object>();
 
         try
         {
             await connection.OpenAsync();
 
-            ConnectingInformation(connection);
+            await ConnectingInformation(connection);
 
             result.TextResult =await Task.FromResult(QueryResult.GetScalarResultAsync(command)?.Result);
         }
         catch (SqlException ex) when (connection.ConnectionTimeout > 30)
         {
-            Logger.LogError(
+            await Logger.LogErrorAsync(
                 $"Время подключения к базе данных истекло \n{ex}",
                 StringWritingParameters.NewLine
                 );
-        }
-        catch (ArgumentNullException ex) when (command.CommandText is null)
-        {
-            Logger.LogError(
-               $"SQL запрос пуст \n{ex}",
-               StringWritingParameters.NewLine
-               );
         }
         finally
         {
@@ -109,29 +104,22 @@ public sealed class MSSQLDatabase : IDatabase
         await using SqlConnection connection = new SqlConnection();
         await using SqlCommand command = new SqlCommand();
 
-        Result<int>? result = new Result<int>();
+        Result<int> result = new Result<int>();
 
         try
         {
             await connection.OpenAsync();
 
-            ConnectingInformation(connection);
+            await ConnectingInformation(connection);
 
             result.TextResult = await Task.FromResult(QueryResult.GetNonQueryResultAsync(command).Result);
         }
         catch (SqlException ex) when (connection.ConnectionTimeout > 30)
         {
-            Logger.LogError(
+            await Logger.LogErrorAsync(
                 $"Время подключения к базе данных истекло \n{ex}",
                 StringWritingParameters.NewLine
                 );
-        }
-        catch (ArgumentNullException ex) when (command.CommandText is null)
-        {
-            Logger.LogError(
-               $"SQL запрос пуст \n{ex}",
-               StringWritingParameters.NewLine
-               );
         }
         finally
         {
@@ -141,9 +129,9 @@ public sealed class MSSQLDatabase : IDatabase
         return result;
     }
 
-    private void ConnectingInformation(SqlConnection connection)
+    private async Task ConnectingInformation(SqlConnection connection)
     {
-        Logger.LogInformation(
+        await Logger.LogInformationAsync(
               "Подключение открыто\n" +
               "Свойства подключения:\n" +
               $"\tСтрока подключения: {connection.ConnectionString}\n" +
@@ -162,7 +150,7 @@ public sealed class MSSQLDatabase : IDatabase
         {
             await connection.CloseAsync();
 
-            Logger.LogInformation(
+            await Logger.LogInformationAsync(
                 "Подключение закрыто\n" +
                 $"\tСостояние: {connection.State}",
                 StringWritingParameters.NewLine

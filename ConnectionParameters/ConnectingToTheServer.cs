@@ -25,9 +25,9 @@ public static class ConnectingToTheServer
             while (ipAddresses[ipAddressItem].AddressFamily != AddressFamily.InterNetwork)
                 ipAddressItem++;
         }
-        catch (ArgumentOutOfRangeException ex)
+        catch (IndexOutOfRangeException ex)
         {
-            Logger.LogError(
+            Logger.LogErrorAsync(
                 ex.ToString(),
                 StringWritingParameters.NewLine
                 );

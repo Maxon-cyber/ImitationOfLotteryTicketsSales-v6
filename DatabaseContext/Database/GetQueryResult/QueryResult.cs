@@ -1,16 +1,19 @@
 ﻿using Logging;
 using Logging.StringRecordingParameters;
 using System.Data.SqlClient;
+using System.Collections.Concurrent;
 
 namespace DatabaseContext.Database.GetQueryResult;
 
 internal static class QueryResult
 {
-    internal static async Task<List<string>?> GetReaderResultAsync(SqlCommand command)
+    internal static async Task<ConcurrentQueue<string>?> GetReaderResultAsync(SqlCommand command)
     {
         await using SqlDataReader reader = await command.ExecuteReaderAsync();
 
-        List<string>? response = new List<string>();
+        ConcurrentQueue<string>? response = new ConcurrentQueue<string>();
+
+        int countQueryResult = 0;
 
         try
         {
@@ -22,30 +25,37 @@ internal static class QueryResult
 
                     if (id is null)
                     {
-                        Logger.LogError(
+                        await Logger.LogErrorAsync(
                             "Билет не найден",
                             StringWritingParameters.NewLine
                             );
                         return null;
                     }
 
+                    countQueryResult++;
+
                     object? status = reader["Status"];
                     object? winningAmount = reader["WinningAmount"];
                
-                    response.Add($"\nId: {id} \nStatus: {status} \nWinning Amount: {winningAmount}");
+                    response.Enqueue(
+                        $"\nTicketCount: {countQueryResult} " +
+                        $"\n\tId: {id} " +
+                        $"\n\tStatus: {status} " +
+                        $"\n\tWinning Amount: {winningAmount}\n"
+                        );
                 }
             }
         }
         catch (SqlException ex) when (!reader.HasRows)
         {
-            Logger.LogError(
+            await Logger.LogErrorAsync(
                 $"База Данных пуста \n{ex}",
-            StringWritingParameters.NewLine
+                StringWritingParameters.NewLine
                 );
         }
         catch (ArgumentNullException ex) when (reader is null)
         {
-            Logger.LogError(
+            await Logger.LogErrorAsync(
                 ex.ToString(),
                 StringWritingParameters.NewLine
                 );
@@ -61,9 +71,9 @@ internal static class QueryResult
         return result;
     }
 
-    internal static async Task<object?> GetScalarResultAsync(SqlCommand command)
+    internal static async Task<object> GetScalarResultAsync(SqlCommand command)
     {
-        object? result = await command.ExecuteScalarAsync();
+        object result = await command.ExecuteScalarAsync();
 
         return result;
     }

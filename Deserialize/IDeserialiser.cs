@@ -1,7 +1,9 @@
-﻿namespace Deserialize;
+﻿using YamlDotNet.Serialization;
+
+namespace Deserialize;
 
 public interface IDeserialiser<TModel>
     where TModel : class
 {
-    public ResultDeserialize<TModel> DeserializeConfiguringFile(string path);
+    public TModel DeserializeConfiguringFile(string path, INamingConvention namingConvetion);
 }

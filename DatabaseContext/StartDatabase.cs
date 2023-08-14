@@ -1,11 +1,6 @@
-﻿using DatabaseContext.AddTicketToDatabase;
-
-namespace DatabaseContext;
+﻿namespace DatabaseContext;
 
 internal class StartDatabase
 {
-    private static void Main()
-    {
-
-    }
+    private static void Main(string[] args) { }
 }

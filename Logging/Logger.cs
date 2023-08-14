@@ -1,59 +1,49 @@
 ﻿using Logging.StringRecordingParameters;
-using Logging.WriteLoggerActionToFile;
 using ResponseFromTheServer;
 
 namespace Logging;
 
 public static class Logger
 {
-    private static string _loggerAction;
-
-    public static void LogInformation(string message, StringWritingParameters stringWritingParameters)
+    public static async Task LogInformationAsync(string message, StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Green;
-
-        _loggerAction = $"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}";
 
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Out.WriteAsync(_loggerAction);
+                await Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}");
                 break;
             case StringWritingParameters.NewLine:
-                Console.Out.WriteLineAsync($"{_loggerAction}\n");
+                await Console.Out.WriteLineAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}\n");
                 break;
         }
 
-        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
 
-    public static void LogInformation(
+    public static async Task LogInformationAsync(
         ServerResponse response,
         string message,
         StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Green;
 
-        _loggerAction = $"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message}";
-
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Out.WriteAsync(_loggerAction);
+                await Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message}");
                 break;
             case StringWritingParameters.NewLine:
-                Console.Out.WriteLineAsync($"{_loggerAction}\n");
+                await Console.Out.WriteLineAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message}\n");
                 break;
         }
-
-        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
 
-    public static void LogInformation(
+    public static async Task LogInformationAsync(
         ServerResponse response,
         string message,
         string clientRequest,
@@ -61,93 +51,77 @@ public static class Logger
     {
         Console.ForegroundColor = ConsoleColor.Green;
 
-        _loggerAction =
-            $"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message} {clientRequest}";
-
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message}");
+                await Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message}");
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Out.WriteAsync(clientRequest);
+                await Console.Out.WriteAsync(clientRequest);
                 break;
             case StringWritingParameters.NewLine:
-                Console.Out.WriteLineAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message} ");
+                await Console.Out.WriteLineAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)response} - {response} {message} ");
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Out.WriteLineAsync(clientRequest + "\n");
+                await Console.Out.WriteLineAsync(clientRequest + "\n");
                 break;
         }
-
-        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
 
-    public static void LogError(string message, StringWritingParameters stringWritingParameters)
+    public static async Task LogErrorAsync(string message, StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Red;
 
-        _loggerAction = $"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}";
-
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Out.WriteAsync(_loggerAction);
+                await Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}");
                 break;
             case StringWritingParameters.NewLine:
-                Console.Out.WriteLineAsync($"{_loggerAction}\n");
+                await Console.Out.WriteLineAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}\n");
                 break;
         }
 
-        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
 
-    public static void LogError(
+    public static async Task LogErrorAsync(
         ServerResponse error,
         string message,
         StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Red;
 
-        _loggerAction = $"LogError: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)error} - {error} {message}";
-
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Out.WriteAsync(_loggerAction);
+                await Console.Out.WriteAsync($"LogError: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)error} - {error} {message}");
                 break;
             case StringWritingParameters.NewLine:
-                Console.Out.WriteLineAsync($"{_loggerAction}\n");
+                await Console.Out.WriteLineAsync($"LogError: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} Response: {(int)error} - {error} {message}\n");
                 break;
         }
-
-        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }
 
-    public static void LogSeparator(
+    public static async Task LogSeparatorAsync(
         char separator,
         int countRepeat,
         StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.DarkMagenta;
 
-        _loggerAction = new string(separator, countRepeat);
-
         switch (stringWritingParameters)
         {
             case StringWritingParameters.None:
-                Console.Out.WriteAsync(_loggerAction);
+                await Console.Out.WriteAsync(new string(separator, countRepeat));
                 break;
             case StringWritingParameters.NewLine:
-                Console.Out.WriteLineAsync($"{_loggerAction}\n");
+                await Console.Out.WriteLineAsync($"{new string(separator, countRepeat)}\n");
                 break;
         }
-
-        CreateLoggerActionFile.WriteLoggerActionToFile(_loggerAction);
 
         Console.ResetColor();
     }

@@ -1,14 +1,13 @@
 ﻿using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Deserialize.YamlDeserialize;
 
-public class DeserializerYaml<TModel> : IDeserialiser<TModel>
+public sealed class DeserializerYaml<TModel> : IDeserialiser<TModel>
     where TModel : class
 {
-    public ResultDeserialize<TModel> DeserializeConfiguringFile(string path) =>
-            new DeserializerBuilder()
-            .WithNamingConvention(UnderscoredNamingConvention.Instance)
-            .Build()
-            .Deserialize<ResultDeserialize<TModel>>(path);
+    public TModel DeserializeConfiguringFile(string path, INamingConvention namingConvention)
+        => new DeserializerBuilder()
+        .WithNamingConvention(namingConvention)
+        .Build()
+        .Deserialize<TModel>(File.ReadAllText(path));
 }
