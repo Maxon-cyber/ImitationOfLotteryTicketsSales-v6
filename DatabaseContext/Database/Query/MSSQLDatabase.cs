@@ -12,25 +12,21 @@ namespace DatabaseContext.Database.Query;
 
 public sealed class MSSQLDatabase : IDatabase
 {
-    private static string _dataBaseName;
     private readonly string ConnectionString;
 
     private class Nested
     {
-        internal static MSSQLDatabase Instance { get; } = new MSSQLDatabase(_dataBaseName);
+        internal static MSSQLDatabase Instance => new MSSQLDatabase();
     }
 
-    public static MSSQLDatabase GetInstance(string DatabaseName)
-    {
-        _dataBaseName = DatabaseName;
-        return Nested.Instance;
-    }
+    public static MSSQLDatabase GetInstance() => Nested.Instance;
 
-    private MSSQLDatabase(string DatabaseName)
+    [Obsolete("Use the Instance static method instead of creating new instances in DatabaseFacde class")]
+    public MSSQLDatabase()
     {
         ConnectionString = new DeserializerYaml<DatabaseModel>()
             .DeserializeConfiguringFile(ConfigFilePath.ConnectionString, PascalCaseNamingConvention.Instance)
-            .Database[DatabaseName]
+            .Database["MSSQLDatabase"]
             .ConnectionString;
 
         Logger.LogInformationAsync(

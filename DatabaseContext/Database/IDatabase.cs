@@ -2,11 +2,11 @@
 
 namespace DatabaseContext.Database;
 
-internal interface IDatabase
+public interface IDatabase
 {
-    internal Task<Result<int>> ExecuteNonQueryAsync(string request);
+    Task<Result<int>> ExecuteNonQueryAsync(string request);
 
-    internal Task<Result<object>> ExecuteScalarAsync(string request);
+    Task<Result<object>> ExecuteScalarAsync(string request);
 
-    internal Task<Result<List<string>>?> ExecuteReaderAsync(string request);
+    Task<Result<List<string>>?> ExecuteReaderAsync(string request);
 }
