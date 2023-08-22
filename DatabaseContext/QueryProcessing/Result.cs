@@ -1,4 +1,4 @@
-﻿namespace DatabaseContext.Databases.Query;
+﻿namespace DatabaseContext.QueyProcessing;
 
 public class Result<TData>
 {

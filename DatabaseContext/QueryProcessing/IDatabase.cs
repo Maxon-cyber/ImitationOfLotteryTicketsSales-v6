@@ -1,7 +1,6 @@
-﻿using DatabaseContext.Databases.Query;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
-namespace DatabaseContext.Database;
+namespace DatabaseContext.QueyProcessing;
 
 public interface IDatabase
 {

@@ -3,7 +3,7 @@ using Logging.StringRecordingParameters;
 using System.Data.SqlClient;
 using System.Collections.Concurrent;
 
-namespace DatabaseContext.Database.Databases.GetQueryResult;
+namespace DatabaseContext.QueryProcessing.Databases.GetQueryResult;
 
 internal static class QueryResult
 {

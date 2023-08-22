@@ -95,7 +95,7 @@ internal class SocketWebServer
                           StringWritingParameters.NewLine
                           );
 
-                    _responseFromDatabase = DatabaseFacade
+                    _responseFromDatabase = DatabaseFactory
                                                 .SelectDatabase(CurrentDatabase.MSSQLDatabase)
                                                 .ExecuteReaderAsync(_sentData.ToString())
                                                 ?.Result

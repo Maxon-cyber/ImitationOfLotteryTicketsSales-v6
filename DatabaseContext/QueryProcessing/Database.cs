@@ -1,7 +1,5 @@
 ﻿using DatabaseContext.Configuring.ConfiguringFilePath;
-using DatabaseContext.Database;
-using DatabaseContext.Database.Databases.GetQueryResult;
-using DatabaseContext.Databases.Query;
+using DatabaseContext.QueyProcessing;
 using DatabaseContext.DeserializeData.DeserializeModels.ConnectionStringModels;
 using Deserialize.YamlDeserialize;
 using Logging;
@@ -10,16 +8,17 @@ using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
 using YamlDotNet.Serialization.NamingConventions;
+using DatabaseContext.QueryProcessing.Databases.GetQueryResult;
 
-namespace DatabaseContext;
+namespace DatabaseContext.QueryProcessing;
 
-public abstract class DbContext : IDatabase
+public abstract class Database : IDatabase
 {
-    internal readonly string ConnectionString;
+    internal readonly string _connectionString;
 
-    internal DbContext(string databaseName)
+    internal Database(string databaseName)
     {
-        ConnectionString = new DeserializerYaml<DatabaseModel>()
+        _connectionString = new DeserializerYaml<DatabaseModel>()
             .DeserializeConfiguringFile(ConfigFilePath.ConnectionString, PascalCaseNamingConvention.Instance)
             .Database[databaseName]
             .ConnectionString;
@@ -27,7 +26,7 @@ public abstract class DbContext : IDatabase
 
     public virtual async Task<Result<int>> ExecuteNonQueryAsync(string request)
     {
-        await using SqlConnection connection = new SqlConnection(ConnectionString);
+        await using SqlConnection connection = new SqlConnection(_connectionString);
         await using SqlCommand command = new SqlCommand(request);
 
         Result<int> result = new Result<int>();
@@ -40,7 +39,8 @@ public abstract class DbContext : IDatabase
 
             result.TextResult = await Task.FromResult(QueryResult.GetNonQueryResultAsync(command).Result);
 
-            await ConsoleLogger.LogInformationAsync("Ответ из БД получен\n",
+            await ConsoleLogger.LogInformationAsync(
+                "Ответ из БД получен\n",
                StringWritingParameters.NewLine
                );
         }
@@ -61,7 +61,7 @@ public abstract class DbContext : IDatabase
 
     public virtual async Task<Result<ConcurrentQueue<string>>?> ExecuteReaderAsync(string request)
     {
-        await using SqlConnection connection = new SqlConnection(ConnectionString);
+        await using SqlConnection connection = new SqlConnection(_connectionString);
         await using SqlCommand command = new SqlCommand(request, connection);
 
         Result<ConcurrentQueue<string>>? result = new Result<ConcurrentQueue<string>>();
@@ -96,7 +96,7 @@ public abstract class DbContext : IDatabase
 
     public virtual async Task<Result<object>> ExecuteScalarAsync(string request)
     {
-        await using SqlConnection connection = new SqlConnection(ConnectionString);
+        await using SqlConnection connection = new SqlConnection(_connectionString);
         await using SqlCommand command = new SqlCommand(request, connection);
 
         Result<object> result = new Result<object>();
@@ -109,7 +109,8 @@ public abstract class DbContext : IDatabase
 
             result.TextResult = await Task.FromResult(QueryResult.GetScalarResultAsync(command)?.Result);
 
-            await ConsoleLogger.LogInformationAsync("Ответ из БД получен\n",
+            await ConsoleLogger.LogInformationAsync(
+                "Ответ из БД получен\n",
                StringWritingParameters.NewLine
                );
         }

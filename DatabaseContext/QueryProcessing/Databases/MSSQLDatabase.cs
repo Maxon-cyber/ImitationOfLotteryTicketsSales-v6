@@ -1,10 +1,11 @@
-﻿using Logging;
+﻿using DatabaseContext.QueyProcessing;
+using Logging;
 using Logging.StringRecordingParameters;
 using System.Collections.Concurrent;
 
-namespace DatabaseContext.Databases.Query;
+namespace DatabaseContext.QueryProcessing.Databases;
 
-internal sealed class MSSQLDatabase : DbContext
+internal sealed class MSSQLDatabase : Database
 {
     private static readonly Lazy<MSSQLDatabase> _instance =
         new Lazy<MSSQLDatabase>(() => new MSSQLDatabase());
