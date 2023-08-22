@@ -1,27 +1,19 @@
-﻿using DatabaseContext.Database;
-using DatabaseContext.Database.Query;
+﻿using DatabaseContext.Databases.Query;
 
 namespace DatabaseContext;
 
 public static class DatabaseFacade
 {
-    public static IDatabase SelectDatabase(string databaseName)
-        => databaseName.ToLower() switch
+    //public static IDatabase SelectDatabase(CurrentDatabase databases)
+    //    => databases switch
+    //    {
+    //        CurrentDatabase.MSSQLDatabase => MSSQLDatabase.GetInstance(),
+    //        CurrentDatabase.MySQLDatabase => MySQLDatabase.GetInstance(),
+    //    };
+
+    public static DbContext SelectDatabase(CurrentDatabase databases)
+        => databases switch
         {
-            "mssqldatabase" => MSSQLDatabase.GetInstance(),
-            "mysqldatabase" => null,
-            "postgre" => null,
-            "mongo" => null,
+            CurrentDatabase.MSSQLDatabase => MSSQLDatabase.GetInstance(),
         };
-}
-
-public static class DatabaseFacade<TDatabase>
-    where TDatabase: IDatabase, new()
-{
-    private class Nested
-    {
-        internal static readonly TDatabase Instance = new TDatabase();
-    }
-
-    public static TDatabase Instance => Nested.Instance;
 }

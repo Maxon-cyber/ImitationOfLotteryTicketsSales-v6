@@ -3,9 +3,11 @@ using ResponseFromTheServer;
 
 namespace Logging;
 
-public static class Logger
+public static class ConsoleLogger
 {
-    public static async Task LogInformationAsync(string message, StringWritingParameters stringWritingParameters)
+    public static async Task LogInformationAsync(
+        string message,
+        StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Green;
 
@@ -15,7 +17,7 @@ public static class Logger
                 await Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}");
                 break;
             case StringWritingParameters.NewLine:
-                await Console.Out.WriteLineAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}\n");
+                await Console.Out.WriteAsync($"LogInformation: {DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()} - {message}\n");
                 break;
         }
 
@@ -68,7 +70,9 @@ public static class Logger
         Console.ResetColor();
     }
 
-    public static async Task LogErrorAsync(string message, StringWritingParameters stringWritingParameters)
+    public static async Task LogErrorAsync(
+        string message,
+        StringWritingParameters stringWritingParameters)
     {
         Console.ForegroundColor = ConsoleColor.Red;
 

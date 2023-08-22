@@ -1,10 +1,9 @@
 ﻿using ConnectionParameters;
 using DatabaseContext;
-using DatabaseContext.Database;
-using DatabaseContext.Database.Query;
 using Logging;
 using Logging.StringRecordingParameters;
 using ResponseFromTheServer;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -15,10 +14,13 @@ internal class SocketWebServer
 {
     private const int COUNT_OF_REPEAT_SEPARATOR = 125;
 
-    private List<string>? _responseFromDatabase;
+    private ConcurrentQueue<string>? _responseFromDatabase;
     private readonly byte[] _receivedData = new byte[1024];
     private readonly StringBuilder _sentData = new StringBuilder();
-    private readonly Socket _tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+    private readonly Socket _tcpListener = new Socket(
+        AddressFamily.InterNetwork, 
+        SocketType.Stream, 
+        ProtocolType.Tcp);
 
     internal SocketWebServer() { }
 
@@ -26,13 +28,13 @@ internal class SocketWebServer
     {
         try
         {
-            Logger.LogInformationAsync(
+            ConsoleLogger.LogInformationAsync(
                 ServerResponse.ServerSuccessfullyStarted,
                 "\nСервер запущен\nОжидание подключений...",
                 StringWritingParameters.NewLine
                 );
 
-            Logger.LogSeparatorAsync(
+            ConsoleLogger.LogSeparatorAsync(
                 '-',
                 COUNT_OF_REPEAT_SEPARATOR,
                 StringWritingParameters.NewLine
@@ -44,7 +46,7 @@ internal class SocketWebServer
         }
         catch (SocketException ex) when (!_tcpListener.Blocking)
         {
-            Logger.LogErrorAsync(
+            ConsoleLogger.LogErrorAsync(
                 ServerResponse.ConnectionIsInterrupted,
                 ex.ToString(),
                 StringWritingParameters.NewLine
@@ -70,7 +72,7 @@ internal class SocketWebServer
 
             if (tcpClient.Connected)
             {
-                Logger.LogInformationAsync(
+                ConsoleLogger.LogInformationAsync(
                     ServerResponse.ConnectionIsStable,
                     $"Пользователь {ConnectingToTheServer.ClientAddress} подключился",
                     StringWritingParameters.NewLine
@@ -86,7 +88,7 @@ internal class SocketWebServer
                     }
                     while (tcpClient.Available > 0);
 
-                    Logger.LogInformationAsync(
+                    ConsoleLogger.LogInformationAsync(
                           ServerResponse.RequestProcessedSuccessfully,
                           $"Пользователь {ConnectingToTheServer.ClientAddress} запросил: ",
                           _sentData.ToString(),
@@ -94,22 +96,16 @@ internal class SocketWebServer
                           );
 
                     _responseFromDatabase = DatabaseFacade
-                                                .SelectDatabase("MSSQLDatabase")
+                                                .SelectDatabase(CurrentDatabase.MSSQLDatabase)
                                                 .ExecuteReaderAsync(_sentData.ToString())
                                                 ?.Result
                                                 ?.TextResult;
-
-                    //_responseFromDatabase = DatabaseFacade<MSSQLDatabase>
-                    //                            .Instance
-                    //                            .ExecuteReaderAsync(_sentData.ToString())
-                    //                            ?.Result
-                    //                            ?.TextResult;
 
                     _sentData.Clear();
 
                     string? result = GetResult(_responseFromDatabase) ?? "null";
 
-                    Logger.LogInformationAsync(
+                    ConsoleLogger.LogInformationAsync(
                         ServerResponse.Ok,
                         $"Ответ пользователю {ConnectingToTheServer.ClientAddress}: ",
                         result,
@@ -124,7 +120,7 @@ internal class SocketWebServer
         }
         }
 
-    private string? GetResult(List<string> responseFromDatabase)
+    private string? GetResult(ConcurrentQueue<string> responseFromDatabase)
     {
         string? result = null;
 
@@ -139,13 +135,13 @@ internal class SocketWebServer
         tcpClient.Shutdown(SocketShutdown.Both);
         tcpClient.Close();
 
-        Logger.LogInformationAsync(
+        ConsoleLogger.LogInformationAsync(
             ServerResponse.ConnectionClosed,
             "Соединение закрыто",
             StringWritingParameters.NewLine
             );
 
-        Logger.LogSeparatorAsync(
+        ConsoleLogger.LogSeparatorAsync(
             '-',
             COUNT_OF_REPEAT_SEPARATOR,
             StringWritingParameters.NewLine

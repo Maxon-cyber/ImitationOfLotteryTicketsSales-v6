@@ -20,7 +20,7 @@ internal class ProcessingClientRequests
 
     internal static string? Response { get; private set; }
 
-    internal ProcessingClientRequests(string httpMethod, int? id)
+    internal ProcessingClientRequests(string httpMethod, long? id)
     {
         switch (httpMethod)
         {
@@ -41,7 +41,7 @@ internal class ProcessingClientRequests
 
     internal async Task SendDataClientToServerAsync()
     {
-        await Logger.LogInformationAsync(
+        await ConsoleLogger.LogInformationAsync(
             ServerResponse.ConnectionIsStable,
             $"Пользователь {ConnectingToTheServer.ClientAddress} запросил - {_description}",
             StringWritingParameters.NewLine
@@ -62,7 +62,7 @@ internal class ProcessingClientRequests
         }
         catch (SocketException ex) when (!_tcpClient.Blocking)
         {
-            await Logger.LogErrorAsync(
+            await ConsoleLogger.LogErrorAsync(
                 ServerResponse.ConnectionIsInterrupted,
                 ex.ToString(),
                 StringWritingParameters.NewLine
@@ -80,7 +80,7 @@ internal class ProcessingClientRequests
         }
         while (_tcpClient.Available > 0);
 
-        await Logger.LogInformationAsync(
+        await ConsoleLogger.LogInformationAsync(
             ServerResponse.Ok,
             $"Ответ пользователю {ConnectingToTheServer.ClientAddress} - ",
             _receivedData.ToString(),
@@ -96,7 +96,7 @@ internal class ProcessingClientRequests
         _tcpClient.Shutdown(SocketShutdown.Both);
         _tcpClient.Close();
 
-        await Logger.LogSeparatorAsync(
+        await ConsoleLogger.LogSeparatorAsync(
            '-',
            COUNT_OF_REPEAT_SEPARATOR,
            StringWritingParameters.NewLine

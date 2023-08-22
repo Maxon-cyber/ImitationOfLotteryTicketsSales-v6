@@ -19,7 +19,7 @@ public class TicketController : Controller
     }
 
     [HttpGet("GetTicket/{id:int?}")]
-    public async Task<ActionResult<string>> GetTicket(int? id)
+    public async Task<ActionResult<string>> GetTicket(long? id)
     {
         if (id is null) 
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.BadRequest("¬ведите id"));
@@ -33,7 +33,7 @@ public class TicketController : Controller
     }
 
     [HttpPost("BuyTicket/{id:int?}")]
-    public async Task<ActionResult<string>> BuyTicket(int? id)
+    public async Task<ActionResult<string>> BuyTicket(long? id)
     {
         if (id is null) 
             return await Task.FromResult<ActionResult<string>>(ResponseOnSite.BadRequest("¬ведите id"));

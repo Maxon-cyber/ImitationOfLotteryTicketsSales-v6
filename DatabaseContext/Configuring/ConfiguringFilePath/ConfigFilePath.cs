@@ -2,6 +2,6 @@
 
 internal static class ConfigFilePath
 {
-    internal static string ConnectionString { get; } 
-        = @"C:\\Users\\рс\\source\\repos\\ImitationOfLotteryTicketsSales\\DatabaseContext\\Configuring\\DatabaseConnection.yml";
+    internal static string ConnectionString
+        => @"C:\\Users\\рс\\source\\repos\\ImitationOfLotteryTicketsSales\\DatabaseContext\\Configuring\\DatabaseConnection.yml";
 }

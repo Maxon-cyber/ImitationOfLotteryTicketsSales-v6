@@ -8,11 +8,11 @@ namespace ConnectionParameters;
 
 public static class ConnectingToTheServer
 {
-    public static IPAddress IP { get; } = GetIPAddress();
-    public static int Port { get; } = 8888;
-    public static string IPString { get; } = GetIPAddress().ToString();
-    public static string ClientAddress { get; } = $"{IP}:{Port}";
-    public static int ListeningState { get; } = 1000;
+    public static IPAddress IP => GetIPAddress();
+    public static int Port => 8888;
+    public static string IPString => IP.ToString();
+    public static string ClientAddress => $"{IP}:{Port}";
+    public static int ListeningState => 1000;
 
     private static IPAddress GetIPAddress()
     {
@@ -27,7 +27,7 @@ public static class ConnectingToTheServer
         }
         catch (IndexOutOfRangeException ex)
         {
-            Logger.LogErrorAsync(
+            ConsoleLogger.LogErrorAsync(
                 ex.ToString(),
                 StringWritingParameters.NewLine
                 );

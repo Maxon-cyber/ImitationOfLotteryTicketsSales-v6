@@ -1,4 +1,5 @@
-﻿using DatabaseContext.Database.Query;
+﻿using DatabaseContext.Databases.Query;
+using System.Collections.Concurrent;
 
 namespace DatabaseContext.Database;
 
@@ -8,5 +9,5 @@ public interface IDatabase
 
     Task<Result<object>> ExecuteScalarAsync(string request);
 
-    Task<Result<List<string>>?> ExecuteReaderAsync(string request);
+    Task<Result<ConcurrentQueue<string>>?> ExecuteReaderAsync(string request);
 }

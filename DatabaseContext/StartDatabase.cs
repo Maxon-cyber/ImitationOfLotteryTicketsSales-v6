@@ -1,4 +1,6 @@
-﻿namespace DatabaseContext;
+﻿using DatabaseContext.Database.Databases;
+
+namespace DatabaseContext;
 
 internal class StartDatabase
 {

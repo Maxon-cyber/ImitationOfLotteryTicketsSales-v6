@@ -3,7 +3,7 @@ using Logging.StringRecordingParameters;
 using System.Data.SqlClient;
 using System.Collections.Concurrent;
 
-namespace DatabaseContext.Database.GetQueryResult;
+namespace DatabaseContext.Database.Databases.GetQueryResult;
 
 internal static class QueryResult
 {
@@ -25,7 +25,7 @@ internal static class QueryResult
 
                     if (id is null)
                     {
-                        await Logger.LogErrorAsync(
+                        await ConsoleLogger.LogErrorAsync(
                             "Билет не найден",
                             StringWritingParameters.NewLine
                             );
@@ -36,7 +36,7 @@ internal static class QueryResult
 
                     object? status = reader["Status"];
                     object? winningAmount = reader["WinningAmount"];
-               
+
                     response.Enqueue(
                         $"\nTicketCount: {countQueryResult} " +
                         $"\n\tId: {id} " +
@@ -48,14 +48,14 @@ internal static class QueryResult
         }
         catch (SqlException ex) when (!reader.HasRows)
         {
-            await Logger.LogErrorAsync(
+            await ConsoleLogger.LogErrorAsync(
                 $"База Данных пуста \n{ex}",
                 StringWritingParameters.NewLine
                 );
         }
         catch (ArgumentNullException ex) when (reader is null)
         {
-            await Logger.LogErrorAsync(
+            await ConsoleLogger.LogErrorAsync(
                 ex.ToString(),
                 StringWritingParameters.NewLine
                 );
