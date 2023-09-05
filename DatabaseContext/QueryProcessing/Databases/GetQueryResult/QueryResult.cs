@@ -5,74 +5,78 @@ using System.Collections.Concurrent;
 
 namespace DatabaseContext.QueryProcessing.Databases.GetQueryResult;
 
-internal static class QueryResult
+internal sealed class QueryResult
 {
-    internal static async Task<ConcurrentQueue<string>?> GetReaderResultAsync(SqlCommand command)
+    internal async Task<ConcurrentQueue<string>?> GetReaderResultAsync(SqlCommand command)
     {
-        await using SqlDataReader reader = await command.ExecuteReaderAsync();
-
         ConcurrentQueue<string>? response = new ConcurrentQueue<string>();
 
-        int countQueryResult = 0;
-
-        try
+        await Task.Run(async () =>
         {
-            if (reader.HasRows)
+            await using SqlDataReader reader = await command.ExecuteReaderAsync();
+
+            int countQueryResult = 0;
+
+            try
             {
-                while (await reader.ReadAsync())
+                if (reader.HasRows)
                 {
-                    object? id = reader["Id"];
-
-                    if (id is null)
+                    while (await reader.ReadAsync())
                     {
-                        await ConsoleLogger.LogErrorAsync(
-                            "Билет не найден",
-                            StringWritingParameters.NewLine
+                        object? id = reader["Id"];
+
+                        if (id is null)
+                        {
+                            await ConsoleLogger.LogErrorAsync(
+                                "Билет не найден",
+                                StringWritingParameters.NewLine
+                                );
+                            response = null;
+                            break;
+                        }
+
+                        countQueryResult++;
+
+                        object? status = reader["Status"];
+                        object? winningAmount = reader["WinningAmount"];
+
+                        response.Enqueue(
+                            $"\nTicketCount: {countQueryResult}" +
+                            $"\n\tId: {id}" +
+                            $"\n\tStatus: {status}" +
+                            $"\n\tWinning Amount: {winningAmount}\n"
                             );
-                        return null;
                     }
-
-                    countQueryResult++;
-
-                    object? status = reader["Status"];
-                    object? winningAmount = reader["WinningAmount"];
-
-                    response.Enqueue(
-                        $"\nTicketCount: {countQueryResult} " +
-                        $"\n\tId: {id} " +
-                        $"\n\tStatus: {status} " +
-                        $"\n\tWinning Amount: {winningAmount}\n"
-                        );
                 }
             }
-        }
-        catch (SqlException ex) when (!reader.HasRows)
-        {
-            await ConsoleLogger.LogErrorAsync(
-                $"База Данных пуста \n{ex}",
-                StringWritingParameters.NewLine
-                );
-        }
-        catch (ArgumentNullException ex) when (reader is null)
-        {
-            await ConsoleLogger.LogErrorAsync(
-                ex.ToString(),
-                StringWritingParameters.NewLine
-                );
-        }
+            catch (SqlException ex) when (!reader.HasRows)
+            {
+                await ConsoleLogger.LogErrorAsync(
+                    $"База Данных пуста \n{ex}",
+                    StringWritingParameters.NewLine
+                    );
+            }
+            catch (ArgumentNullException ex) when (reader is null)
+            {
+                await ConsoleLogger.LogErrorAsync(
+                    ex.ToString(),
+                    StringWritingParameters.NewLine
+                    );
+            }
+        });
 
         return response;
     }
 
-    internal static async Task<int> GetNonQueryResultAsync(SqlCommand command)
-    {
+    internal async Task<int> GetNonQueryResultAsync(SqlCommand command)
+    { 
         int result = await command.ExecuteNonQueryAsync();
 
         return result;
     }
 
-    internal static async Task<object> GetScalarResultAsync(SqlCommand command)
-    {
+    internal async Task<object> GetScalarResultAsync(SqlCommand command)
+    { 
         object result = await command.ExecuteScalarAsync();
 
         return result;

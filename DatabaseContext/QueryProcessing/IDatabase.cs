@@ -2,7 +2,7 @@
 
 namespace DatabaseContext.QueyProcessing;
 
-public interface IDatabase
+public interface IDatabase : IDisposable
 {
     Task<Result<int>> ExecuteNonQueryAsync(string request);
 

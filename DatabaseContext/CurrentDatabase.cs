@@ -2,6 +2,6 @@
 
 public enum CurrentDatabase
 {
-    MSSQLDatabase,
-    MySQLDatabase,
+    MSSQLDatabase = 1,
+    MySQLDatabase = 2,
 }

@@ -7,8 +7,7 @@ namespace DatabaseContext.QueryProcessing.Databases;
 
 internal sealed class MSSQLDatabase : Database
 {
-    private static readonly Lazy<MSSQLDatabase> _instance =
-        new Lazy<MSSQLDatabase>(() => new MSSQLDatabase());
+    private static readonly Lazy<MSSQLDatabase> _instance = new Lazy<MSSQLDatabase>(() => new MSSQLDatabase());
 
     internal static MSSQLDatabase GetInstance() => _instance.Value;
 

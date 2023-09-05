@@ -1,6 +1,4 @@
-﻿using DatabaseContext.QueryProcessing.Database.Databases;
-
-namespace DatabaseContext;
+﻿namespace DatabaseContext;
 
 internal class StartDatabase
 {

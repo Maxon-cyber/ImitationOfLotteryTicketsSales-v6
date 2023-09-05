@@ -12,6 +12,8 @@ internal class ProcessingClientRequests
 {
     private const int COUNT_OF_REPEAT_SEPARATOR = 130;
 
+    private static readonly object _lock = new object();
+
     private readonly string _request;
     private readonly string _description;
     private readonly byte[] _buffer = new byte[512];
@@ -25,15 +27,15 @@ internal class ProcessingClientRequests
         switch (httpMethod)
         {
             case "GetAllTickets":
-                _request = SQLRequest.GetAllTicketsQuery();
+                _request = SQLQuery.GetAllTicketsQuery();
                 _description = "Получить все билеты";
                 break;
             case "GetTicketAnId":
-                _request = SQLRequest.GetTicketAnIdQuery(id);
+                _request = SQLQuery.GetTicketAnIdQuery(id);
                 _description = "Получить билет по Id";
                 break;
             case "BuyTicketAnId":
-                _request = SQLRequest.BuyTicketAnIdQuery(id);
+                _request = SQLQuery.BuyTicketAnIdQuery(id);
                 _description = "Купить билет по Id";
                 break;
         }
@@ -58,7 +60,7 @@ internal class ProcessingClientRequests
             await _tcpClient.SendAsync(Encoding.UTF8.GetBytes(_request));
 
             await ResponseReceivedFromServerAsync();
-            EndSession();
+            await EndSession();
         }
         catch (SocketException ex) when (!_tcpClient.Blocking)
         {

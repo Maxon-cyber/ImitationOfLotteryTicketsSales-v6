@@ -1,6 +1,6 @@
 ﻿namespace LotteryTicketWebAPI.RequestProcessing;
 
-internal readonly struct SQLRequest
+internal readonly struct SQLQuery
 {
     internal static string GetAllTicketsQuery()
         => $"SELECT * FROM dbo.AllTickets;";

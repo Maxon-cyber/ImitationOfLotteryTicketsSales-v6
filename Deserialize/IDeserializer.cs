@@ -2,7 +2,7 @@
 
 namespace Deserialize;
 
-public interface IDeserialiser<TModel>
+public interface IDeserializer<TModel>
     where TModel : class
 {
     public TModel DeserializeConfiguringFile(string path, INamingConvention namingConvetion);

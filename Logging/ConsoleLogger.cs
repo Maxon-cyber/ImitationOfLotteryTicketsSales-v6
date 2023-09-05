@@ -21,7 +21,6 @@ public static class ConsoleLogger
                 break;
         }
 
-
         Console.ResetColor();
     }
 

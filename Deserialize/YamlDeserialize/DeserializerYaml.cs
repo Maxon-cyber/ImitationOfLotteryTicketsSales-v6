@@ -2,7 +2,7 @@
 
 namespace Deserialize.YamlDeserialize;
 
-public sealed class DeserializerYaml<TModel> : IDeserialiser<TModel>
+internal sealed class DeserializerYaml<TModel> : IDeserializer<TModel>
     where TModel : class
 {
     public TModel DeserializeConfiguringFile(string filePath, INamingConvention namingConvention)

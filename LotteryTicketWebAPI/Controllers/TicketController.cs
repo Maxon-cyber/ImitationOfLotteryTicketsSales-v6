@@ -7,6 +7,7 @@ namespace LotteryTicketWebAPI.Controllers;
 [Route("Ticket")]
 public class TicketController : Controller
 {
+    [HttpGet("/")]
     [HttpGet("GetAllTickets")]
     public async Task<ActionResult<string>> GetAllTickets()
     {

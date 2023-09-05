@@ -1,10 +1,10 @@
 ﻿using DatabaseContext.QueryProcessing;
 using DatabaseContext.QueryProcessing.Databases;
-using DatabaseContext.QueryProcessing.Databases.Databases;
+using DatabaseContext.QueryProcessing.Databases.GetQueryResult;
 
 namespace DatabaseContext;
 
-public static class DatabaseFactory
+public class DatabaseStrategy
 {
     public static Database SelectDatabase(CurrentDatabase databases)
         => databases switch

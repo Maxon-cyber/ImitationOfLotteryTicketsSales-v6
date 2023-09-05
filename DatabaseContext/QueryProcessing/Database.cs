@@ -1,25 +1,25 @@
 ﻿using DatabaseContext.Configuring.ConfiguringFilePath;
-using DatabaseContext.QueyProcessing;
 using DatabaseContext.DeserializeData.DeserializeModels.ConnectionStringModels;
-using Deserialize.YamlDeserialize;
+using DatabaseContext.QueryProcessing.Databases.GetQueryResult;
+using DatabaseContext.QueyProcessing;
+using Deserialize;
 using Logging;
 using Logging.StringRecordingParameters;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Data.SqlClient;
-using YamlDotNet.Serialization.NamingConventions;
-using DatabaseContext.QueryProcessing.Databases.GetQueryResult;
 
 namespace DatabaseContext.QueryProcessing;
 
 public abstract class Database : IDatabase
 {
-    internal readonly string _connectionString;
+    private readonly string _connectionString;
+    private readonly QueryResult _queryResult = new QueryResult();
 
-    internal Database(string databaseName)
+    protected Database(string databaseName)
     {
-        _connectionString = new DeserializerYaml<DatabaseModel>()
-            .DeserializeConfiguringFile(ConfigFilePath.ConnectionString, PascalCaseNamingConvention.Instance)
+        _connectionString = Deserializer<DatabaseModel>
+            .Deserialize(ConfigFilePath.ConnectionString)
             .Database[databaseName]
             .ConnectionString;
     }
@@ -27,7 +27,10 @@ public abstract class Database : IDatabase
     public virtual async Task<Result<int>> ExecuteNonQueryAsync(string request)
     {
         await using SqlConnection connection = new SqlConnection(_connectionString);
-        await using SqlCommand command = new SqlCommand(request);
+        await using SqlCommand command = new SqlCommand(request, connection)
+        {
+            CommandTimeout = 300
+        };
 
         Result<int> result = new Result<int>();
 
@@ -37,14 +40,14 @@ public abstract class Database : IDatabase
 
             await ConnectingInformation(connection);
 
-            result.TextResult = await Task.FromResult(QueryResult.GetNonQueryResultAsync(command).Result);
+            result.Value = await Task.FromResult(_queryResult.GetNonQueryResultAsync(command).Result);
 
             await ConsoleLogger.LogInformationAsync(
                 "Ответ из БД получен\n",
-               StringWritingParameters.NewLine
-               );
+                StringWritingParameters.NewLine
+                );
         }
-        catch (SqlException ex) when (connection.ConnectionTimeout > 30)
+        catch (SqlException ex)
         {
             await ConsoleLogger.LogErrorAsync(
                 $"Время подключения к базе данных истекло \n{ex}",
@@ -72,7 +75,7 @@ public abstract class Database : IDatabase
 
             await ConnectingInformation(connection);
 
-            result.TextResult = await Task.FromResult(QueryResult.GetReaderResultAsync(command)?.Result);
+            result.Value = await Task.FromResult(_queryResult.GetReaderResultAsync(command)?.Result);
 
             await ConsoleLogger.LogInformationAsync(
                 "Ответ из БД получен\n",
@@ -107,7 +110,7 @@ public abstract class Database : IDatabase
 
             await ConnectingInformation(connection);
 
-            result.TextResult = await Task.FromResult(QueryResult.GetScalarResultAsync(command)?.Result);
+            result.Value = await Task.FromResult(_queryResult.GetScalarResultAsync(command)?.Result);
 
             await ConsoleLogger.LogInformationAsync(
                 "Ответ из БД получен\n",
@@ -156,5 +159,19 @@ public abstract class Database : IDatabase
                 StringWritingParameters.NewLine
                 );
         }
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposing)
+            return;
+    }
+
+    ~Database() => Dispose(disposing: false);
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
