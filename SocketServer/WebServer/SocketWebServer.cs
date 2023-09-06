@@ -104,14 +104,21 @@ internal sealed class SocketWebServer
                             _responseFromDatabase = DatabaseStrategy
                                                         .SelectDatabase(CurrentDatabase.MSSQLDatabase)
                                                         .ExecuteReaderAsync(_sentData.ToString())
-                                                        .Result
-                                                        .Value;
+                                                        .Result!
+                                                        .Value!;
 
                             _cash.Add(_sentData.ToString(), _responseFromDatabase);
-
                         }
                         else
-                            _responseFromDatabase = _cash.TakeValue("");
+                        {
+                            _responseFromDatabase = _cash.TakeValue(_sentData.ToString());
+
+                            ConsoleLogger.LogInformationAsync(
+                                "Ответ был получен из кеша\n" +
+                                $"Оствавшееся место в кеше: {_cash.FreeSpaceInCash} Кб",
+                                StringWritingParameters.NewLine
+                                );
+                        }
 
                         _sentData.Clear();
 

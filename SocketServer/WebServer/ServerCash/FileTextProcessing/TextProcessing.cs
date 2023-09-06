@@ -1,13 +1,13 @@
-﻿using System.Collections.Concurrent;
+﻿using SocketServer.WebServer.ServerCash.StorageLocation;
+using System.Collections.Concurrent;
 
 namespace SocketServer.WebServer.ServerCash.FileTextProcessing;
 
 internal class TextProcessing
 {
     internal static string TextSeparator => new string('-', 40);
-    private const string END_POINT_FILE = "End";
 
-    internal ConcurrentQueue<string> AddKeyAndTextSeparator(string key, ConcurrentQueue<string> value)
+    internal ConcurrentQueue<string> AddKeyAndValue(string key, ConcurrentQueue<string> value)
     {
         ConcurrentQueue<string> text = new ConcurrentQueue<string>();
 
@@ -16,18 +16,32 @@ internal class TextProcessing
         foreach (string result in value)
             text.Enqueue(result);
 
-        text.Enqueue($"{TextSeparator}\n{END_POINT_FILE}");
+        text.Enqueue(TextSeparator);
 
         return text;
     }
 
-    internal List<string> GetFileText(string path)
+    internal string[] GetFileText(string path)
     {
-        List<string> textFile = new List<string>();
+        string[] text = File.ReadAllLines(path);
 
-        for (string text = " "; text is not "\n\r\n\n"; text = File.ReadAllText(path))
-            textFile.Add(text);
+        return text;
+    }
 
-        return textFile;
+    internal int GetKeyLineNumberFromFile(string[] textFile, string key)
+    {
+        int keyLineNumber = 0;
+
+        for (int index = 0; index < textFile.Length; index++)
+        {
+            if (textFile[index] == key)
+            {
+                keyLineNumber = index;
+                break;
+            }
+                
+        }
+
+        return keyLineNumber;
     }
 }
