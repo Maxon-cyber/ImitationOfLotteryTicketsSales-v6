@@ -30,8 +30,7 @@ internal class Cash
         foreach (string text in _textFile)
             if (text == key)
                 for (int index = initialIndexKey; _textFile[index] != TextProcessing.TextSeparator; index++)
-                    if (_textFile[index] != key)
-                        value.Enqueue($"{_textFile[index]}\n");
+                    value.Enqueue($"{_textFile[index]}\n");
 
         return value;
     }
