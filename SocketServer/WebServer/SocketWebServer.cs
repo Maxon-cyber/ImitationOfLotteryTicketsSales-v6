@@ -19,7 +19,6 @@ internal sealed class SocketWebServer
 
     private ConcurrentQueue<string> _responseFromDatabase;
 
-    private readonly Cash _cash = new Cash();
     private readonly byte[] _receivedData = new byte[1024];
     private readonly StringBuilder _sentData = new StringBuilder();
     private readonly Socket _tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -99,7 +98,7 @@ internal sealed class SocketWebServer
                               StringWritingParameters.NewLine
                               );
 
-                        if (!_cash.Contains(_sentData.ToString()))
+                        if (!Cash.Contains(_sentData.ToString()))
                         {
                             _responseFromDatabase = DatabaseStrategy
                                                         .SelectDatabase(CurrentDatabase.MSSQLDatabase)
@@ -107,15 +106,15 @@ internal sealed class SocketWebServer
                                                         .Result!
                                                         .Value!;
 
-                            _cash.Add(_sentData.ToString(), _responseFromDatabase);
+                            Cash.Add(_sentData.ToString(), _responseFromDatabase);
                         }
                         else
                         {
-                            _responseFromDatabase = _cash.TakeValue(_sentData.ToString());
+                            _responseFromDatabase = Cash.TakeValue(_sentData.ToString());
 
                             ConsoleLogger.LogInformationAsync(
                                 "Ответ был получен из кеша\n" +
-                                $"Оствавшееся место в кеше: {_cash.FreeSpaceInCash} Кб",
+                                $"Оствавшееся место в кеше: {Cash.FreeSpace} Кб",
                                 StringWritingParameters.NewLine
                                 );
                         }
@@ -133,7 +132,7 @@ internal sealed class SocketWebServer
 
                         tcpClient.Send(Encoding.UTF8.GetBytes(result));
 
-                        Stop(tcpClient);
+                        Stop(ref tcpClient);
                     });
                 }
             }
@@ -142,15 +141,15 @@ internal sealed class SocketWebServer
 
     private string? GetResult(ConcurrentQueue<string> responseFromDatabase)
     {
-        string? result = null;
+        StringBuilder? result = new StringBuilder();
 
         foreach (string? item in responseFromDatabase)
-            result += item;
+            result.Append(item);
 
-        return result;
+        return result.ToString();
     }
 
-    private void Stop(Socket tcpClient)
+    private void Stop(ref Socket tcpClient)
     {
         tcpClient.Shutdown(SocketShutdown.Both);
         tcpClient.Close();

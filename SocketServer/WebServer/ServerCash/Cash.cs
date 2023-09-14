@@ -8,21 +8,20 @@ internal class Cash
 {
     private const int MAX_CAPACITY_STORAGE = 1_000;
 
-    private readonly string[] _textFile = null!;
-    private readonly TextProcessing _textProcessing = new TextProcessing();
-    private readonly FileInfo _file = new FileInfo(PathStorageLocation.Path);
-    
-    internal long FreeSpaceInCash => MAX_CAPACITY_STORAGE - _textFile.LongLength;
+    private static readonly string[] _textFile = null!;
+    private static readonly TextProcessing _textProcessing = new TextProcessing();
 
-    internal Cash() => _textFile = _textProcessing.GetFileText(PathStorageLocation.Path);
+    internal static long FreeSpace => MAX_CAPACITY_STORAGE - _textFile.LongLength;
 
-    internal void Add(string key, ConcurrentQueue<string> value)
+    static Cash() => _textFile = _textProcessing.GetFileText(PathStorageLocation.Path);
+
+    internal static void Add(string key, ConcurrentQueue<string> value)
     {
-        if (_file.Length < MAX_CAPACITY_STORAGE)
+        if (_textFile.Length < MAX_CAPACITY_STORAGE)
             File.AppendAllLines(PathStorageLocation.Path, _textProcessing.AddKeyAndValue(key, value));
     }
 
-    internal ConcurrentQueue<string> TakeValue(string key)
+    internal static ConcurrentQueue<string> TakeValue(string key)
     {
         ConcurrentQueue<string> value = new ConcurrentQueue<string>();
 
@@ -31,15 +30,13 @@ internal class Cash
         foreach (string text in _textFile)
             if (text == key)
                 for (int index = initialIndexKey; _textFile[index] != TextProcessing.TextSeparator; index++)
-                {
                     if (_textFile[index] != key)
-                    value.Enqueue($"{_textFile[index]}\n");
-                }
+                        value.Enqueue($"{_textFile[index]}\n");
 
         return value;
     }
 
-    internal bool Contains(string key)
+    internal static bool Contains(string key)
     {
         for (int index = 0; index < _textFile.Length; index++)
             if (_textFile[index] == key)

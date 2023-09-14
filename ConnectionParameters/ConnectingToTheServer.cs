@@ -9,10 +9,9 @@ namespace ConnectionParameters;
 public static class ConnectingToTheServer
 {
     public static IPAddress IP => GetIPAddress();
-    public static int Port => 8888;
-    public static string IPString => IP.ToString();
-    public static string ClientAddress => $"{IP}:{Port}";
-    public static int ListeningState => 1000;
+    public static int Port => 8_888;
+    public static string ClientAddress => Dns.GetHostName();
+    public static int ListeningState => 1_000;
 
     private static IPAddress GetIPAddress()
     {

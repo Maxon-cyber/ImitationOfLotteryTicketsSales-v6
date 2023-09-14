@@ -27,10 +27,7 @@ public abstract class Database : IDatabase
     public virtual async Task<Result<int>> ExecuteNonQueryAsync(string request)
     {
         await using SqlConnection connection = new SqlConnection(_connectionString);
-        await using SqlCommand command = new SqlCommand(request, connection)
-        {
-            CommandTimeout = 300
-        };
+        await using SqlCommand command = new SqlCommand(request, connection);
 
         Result<int> result = new Result<int>();
 
@@ -159,19 +156,5 @@ public abstract class Database : IDatabase
                 StringWritingParameters.NewLine
                 );
         }
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!disposing)
-            return;
-    }
-
-    ~Database() => Dispose(disposing: false);
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }
